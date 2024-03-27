@@ -7,7 +7,9 @@ void VulkanBase::initWindow() {
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Rupert Vanderstappen", nullptr, nullptr);
 }
 
-void VulkanBase::drawScene() {
+void VulkanBase::drawScene()
+{
 	// Use mesh draw call here
-	vkCmdDraw(m_CommandBuffer.GetVkCommandBuffer(), 6, 1, 0, 0);
+	//vkCmdDraw(m_CommandBuffer.GetVkCommandBuffer(), 6, 1, 0, 0);
+	m_TriangleMesh.Draw(m_CommandBuffer.GetVkCommandBuffer());
 }

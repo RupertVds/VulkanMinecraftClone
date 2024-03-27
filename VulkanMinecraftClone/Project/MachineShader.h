@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "vulkanbase/VulkanUtil.h"
+#include "Mesh.h"
 
 class MachineShader final
 {
@@ -49,15 +50,23 @@ public:
 		vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 		vertShaderStageInfo.module = vertShaderModule;
 		vertShaderStageInfo.pName = m_VSEntryPoint.c_str();
+
 		return vertShaderStageInfo;
 	}
 
-	VkPipelineVertexInputStateCreateInfo createVertexInputStateInfo()
+	std::unique_ptr<VkPipelineVertexInputStateCreateInfo> createVertexInputStateInfo()
 	{
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexBindingDescriptionCount = 0;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
+		auto vertexInputInfo = std::make_unique<VkPipelineVertexInputStateCreateInfo>();
+		vertexInputInfo->sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		auto bindingDescription = Vertex::getBindingDescription();
+		auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+		vertexInputInfo->vertexBindingDescriptionCount = 1;
+		vertexInputInfo->vertexAttributeDescriptionCount = static_cast<uint32_t>(2);
+		vertexInputInfo->pVertexBindingDescriptions = bindingDescription.release();
+		vertexInputInfo->pVertexAttributeDescriptions = attributeDescriptions.release();
+		vertexInputInfo->flags = 0;
+
 		return vertexInputInfo;
 	}
 
@@ -70,7 +79,8 @@ public:
 		return inputAssembly;
 	}
 
-	VkShaderModule createShaderModule(const VkDevice& device, const std::vector<char>& code) {
+	VkShaderModule createShaderModule(const VkDevice& device, const std::vector<char>& code) 
+	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = code.size();

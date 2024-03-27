@@ -17,6 +17,7 @@
 #include <MachineShader.h>
 #include <CommandBuffer.h>
 #include <CommandPool.h>
+#include <Mesh.h>
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -42,6 +43,12 @@ public:
 	}
 
 private:
+	const std::vector<Vertex> vertices = {
+	{{0.0f, -0.5f, 0.f}, {0.5f, 1.0f, 1.0f}},
+	{{0.5f, 0.5f, 0.f}, {0.0f, 1.0f, 0.0f}},
+	{{-0.5f, 0.5f, 0.f}, {0.0f, 0.0f, 1.0f}}
+	};
+
 	void initVulkan() {
 		// week 06
 		createInstance();
@@ -52,19 +59,24 @@ private:
 		pickPhysicalDevice();
 		createLogicalDevice();
 
+
 		// week 04 
 		createSwapChain();
 		createImageViews();
 		
+		
 		// week 03
 		m_MachineShader.Initialize(device);
 		createRenderPass();
+		m_TriangleMesh.Initialize(physicalDevice, device);
 		createGraphicsPipeline();
 		createFrameBuffers();
+
 
 		// week 02
 		m_CommandPool.Initialize(device, findQueueFamilies(physicalDevice));
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
+
 
 		// week 06
 		createSyncObjects();
@@ -104,6 +116,9 @@ private:
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		}
 		vkDestroySwapchainKHR(device, swapChain, nullptr);
+		
+		m_TriangleMesh.DestroyMesh(device);
+
 		vkDestroyDevice(device, nullptr);
 
 		vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -160,6 +175,7 @@ private:
 	// Week 03
 	// Renderpass concept
 	// Graphics pipeline
+	Mesh m_TriangleMesh{vertices};
 	
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 	VkPipelineLayout pipelineLayout;

@@ -54,7 +54,8 @@ void VulkanBase::createRenderPass() {
 	}
 }
 
-void VulkanBase::createGraphicsPipeline() {
+void VulkanBase::createGraphicsPipeline() 
+{
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewportState.viewportCount = 1;
@@ -98,11 +99,12 @@ void VulkanBase::createGraphicsPipeline() {
 	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
 	dynamicState.pDynamicStates = dynamicStates.data();
-
+	
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 0;
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
+	pipelineLayoutInfo.flags = 0;
 
 	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
@@ -118,13 +120,14 @@ void VulkanBase::createGraphicsPipeline() {
 
 	pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
 	pipelineInfo.pStages = shaderStages.data();
-	VkPipelineVertexInputStateCreateInfo pvisci = m_MachineShader.createVertexInputStateInfo();
-	pipelineInfo.pVertexInputState = &pvisci;
+	auto pvisci = m_MachineShader.createVertexInputStateInfo();
+	pipelineInfo.pVertexInputState = pvisci.get();
+	//pipelineInfo.pVertexInputState = pvisci.release();
 
 	// copy elision : C++20
 	// std::move ?
 
-	VkPipelineInputAssemblyStateCreateInfo piasci = m_MachineShader.createInputAssemblyStateInfo();
+	auto& piasci = m_MachineShader.createInputAssemblyStateInfo();
 	pipelineInfo.pInputAssemblyState = &piasci;
 
 	pipelineInfo.pViewportState = &viewportState;
