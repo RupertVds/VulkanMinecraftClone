@@ -36,7 +36,7 @@ set(SOURCES
     "labwork/Week04.cpp" 
     "labwork/Week05.cpp"
     "labwork/Week06.cpp"
- "MachineShader.h" "Mesh2D.h" "Mesh2D.cpp" "CommandPool.h" "CommandPool.cpp" "CommandBuffer.h" "CommandBuffer.cpp" "QueueManager.h" "QueueManager.cpp")
+ "MachineShader.h" "Mesh2D.h" "Mesh2D.cpp" "CommandPool.h" "CommandPool.cpp" "CommandBuffer.h" "CommandBuffer.cpp" "QueueManager.h" "QueueManager.cpp" "SwapchainManager.h" "SwapchainManager.cpp")
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES} )

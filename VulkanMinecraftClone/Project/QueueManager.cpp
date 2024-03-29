@@ -11,7 +11,8 @@ void QueueManager::Initialize(VkDevice device, VkPhysicalDevice physicalDevice, 
     vkGetDeviceQueue(device, indices.m_PresentFamily.value(), 0, &m_PresentationQueue);
 }
 
-QueueFamilyIndices QueueManager::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface) {
+QueueFamilyIndices QueueManager::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
+{
     QueueFamilyIndices indices;
 
     uint32_t queueFamilyCount = 0;
@@ -20,20 +21,24 @@ QueueFamilyIndices QueueManager::FindQueueFamilies(VkPhysicalDevice device, VkSu
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-    int i = 0;
-    for (const auto& queueFamily : queueFamilies) {
-        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+    int i{};
+    for (const auto& queueFamily : queueFamilies) 
+    {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) 
+        {
             indices.m_GraphicsFamily = i;
         }
 
         VkBool32 presentSupport = false;
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 
-        if (presentSupport) {
+        if (presentSupport) 
+        {
             indices.m_PresentFamily = i;
         }
 
-        if (indices.isComplete()) {
+        if (indices.isComplete()) 
+        {
             break;
         }
 

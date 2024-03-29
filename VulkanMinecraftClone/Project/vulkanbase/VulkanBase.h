@@ -19,20 +19,24 @@
 #include <CommandPool.h>
 #include <Mesh2D.h>
 #include <QueueManager.h>
+#include <SwapchainManager.h>
 
-const std::vector<const char*> validationLayers = {
+const std::vector<const char*> validationLayers = 
+{
 	"VK_LAYER_KHRONOS_validation"
 };
 
-const std::vector<const char*> deviceExtensions = {
+const std::vector<const char*> deviceExtensions = 
+{
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-struct SwapChainSupportDetails {
-	VkSurfaceCapabilitiesKHR capabilities;
-	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
-};
+//struct SwapChainSupportDetails 
+//{
+//	VkSurfaceCapabilitiesKHR capabilities;
+//	std::vector<VkSurfaceFormatKHR> formats;
+//	std::vector<VkPresentModeKHR> presentModes;
+//};
 
 class VulkanBase {
 public:
@@ -62,8 +66,9 @@ private:
 
 
 		// week 04 
-		createSwapChain();
-		createImageViews();
+		//createSwapChain(window);
+		SwapchainManager::GetInstance().Initialize(instance, physicalDevice, device, surface, window);
+		//createImageViews();
 		
 		
 		// week 03
@@ -84,8 +89,10 @@ private:
 		createSyncObjects();
 	}
 
-	void mainLoop() {
-		while (!glfwWindowShouldClose(window)) {
+	void mainLoop()
+	{
+		while (!glfwWindowShouldClose(window)) 
+		{
 			glfwPollEvents();
 			// week 06
 			drawFrame();
@@ -93,7 +100,8 @@ private:
 		vkDeviceWaitIdle(device);
 	}
 
-	void cleanup() {
+	void cleanup() 
+	{
 		vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
 		vkDestroyFence(device, inFlightFence, nullptr);
@@ -110,14 +118,15 @@ private:
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 		vkDestroyRenderPass(device, renderPass, nullptr);
 
-		for (auto imageView : swapChainImageViews) {
-			vkDestroyImageView(device, imageView, nullptr);
-		}
+		//for (auto imageView : swapChainImageViews) {
+		//	vkDestroyImageView(device, imageView, nullptr);
+		//}
 
 		if (enableValidationLayers) {
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		}
-		vkDestroySwapchainKHR(device, swapChain, nullptr);
+		SwapchainManager::GetInstance().Cleanup();
+		//vkDestroySwapchainKHR(device, swapChain, nullptr);
 		
 		m_TriangleMesh.DestroyMesh(device);
 
@@ -185,19 +194,19 @@ private:
 	// Week 04
 	// Swap chain and image view support
 
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
+	//VkSwapchainKHR swapChain;
+	//std::vector<VkImage> swapChainImages;
+	//VkFormat swapChainImageFormat;
+	//VkExtent2D swapChainExtent;
 
-	std::vector<VkImageView> swapChainImageViews;
+	//std::vector<VkImageView> swapChainImageViews;
 
-	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	void createSwapChain();
-	void createImageViews();
+	//SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+	//VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+	//VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+	//VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	//void createSwapChain();
+	//void createImageViews();
 
 	// Week 05 
 	// Logical and physical device

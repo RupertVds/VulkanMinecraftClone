@@ -43,6 +43,7 @@ void VulkanBase::drawFrame()
 	vkResetFences(device, 1, &inFlightFence);
 
 	uint32_t imageIndex;
+	auto swapChain = SwapchainManager::GetInstance().GetSwapchain();
 	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
 	// Combine this to record buffer?

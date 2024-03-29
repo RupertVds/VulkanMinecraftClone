@@ -1,6 +1,8 @@
 #include "vulkanbase/VulkanBase.h"
 
-void VulkanBase::createFrameBuffers() {
+void VulkanBase::createFrameBuffers() 
+{
+	auto& swapChainImageViews = SwapchainManager::GetInstance().GetImageViews();
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
 		VkImageView attachments[] = {
@@ -12,19 +14,21 @@ void VulkanBase::createFrameBuffers() {
 		framebufferInfo.renderPass = renderPass;
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = attachments;
-		framebufferInfo.width = swapChainExtent.width;
-		framebufferInfo.height = swapChainExtent.height;
+		framebufferInfo.width = SwapchainManager::GetInstance().GetSwapchainExtent().width;
+		framebufferInfo.height = SwapchainManager::GetInstance().GetSwapchainExtent().height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) 
+		{
 			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
 }
 
-void VulkanBase::createRenderPass() {
+void VulkanBase::createRenderPass()
+{
 	VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = swapChainImageFormat;
+	colorAttachment.format = SwapchainManager::GetInstance().GetSwapchainImageFormat();
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
