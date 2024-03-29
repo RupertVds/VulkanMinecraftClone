@@ -5,16 +5,16 @@
 #include <array>
 #include <memory>
 
-struct Vertex
+struct Vertex2D
 {
-	glm::vec3 position;
+	glm::vec2 position;
 	glm::vec3 color;
 
 	static std::unique_ptr<VkVertexInputBindingDescription> getBindingDescription() 
 	{
 		auto bindingDescription = std::make_unique<VkVertexInputBindingDescription>();
 		bindingDescription->binding = 0;
-		bindingDescription->stride = sizeof(Vertex);
+		bindingDescription->stride = sizeof(Vertex2D);
 		bindingDescription->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		
 		return bindingDescription; // std::move() ?
@@ -27,12 +27,12 @@ struct Vertex
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
 		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(Vertex, position);
+		attributeDescriptions[0].offset = offsetof(Vertex2D, position);
 		
 		attributeDescriptions[1].binding = 0;
 		attributeDescriptions[1].location = 1;
 		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
+		attributeDescriptions[1].offset = offsetof(Vertex2D, color);
 
 		return attributeDescriptions; // std::move() ?
 	}
@@ -41,7 +41,7 @@ struct Vertex
 class Mesh final
 {
 public:
-	Mesh(const std::vector<Vertex>& vertices);
+	Mesh(const std::vector<Vertex2D>& vertices);
 	~Mesh() = default;
 	
 	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device);
@@ -52,7 +52,7 @@ private:
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, VkPhysicalDeviceMemoryProperties memProperties, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	VkBuffer m_VkBuffer;
 	VkDeviceMemory m_VkBufferMemory;
-	std::vector<Vertex> m_Vertices;
+	std::vector<Vertex2D> m_Vertices;
 
 	// all a mesh should contain:
 	// m_vertices

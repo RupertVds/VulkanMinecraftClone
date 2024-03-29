@@ -1,7 +1,7 @@
 #include "Mesh2D.h"
 #include <stdexcept>
 
-Mesh::Mesh(const std::vector<Vertex>& vertices)
+Mesh::Mesh(const std::vector<Vertex2D>& vertices)
     :
     m_Vertices{vertices},
     m_VkBuffer{VK_NULL_HANDLE},

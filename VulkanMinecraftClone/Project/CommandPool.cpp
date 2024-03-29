@@ -15,7 +15,7 @@ void CommandPool::Initialize(const VkDevice& device, const QueueFamilyIndices& q
 	VkCommandPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = queue.graphicsFamily.value();
+	poolInfo.queueFamilyIndex = queue.m_GraphicsFamily.value();
 
 	if (vkCreateCommandPool(device, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 	{

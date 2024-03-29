@@ -67,7 +67,7 @@ void VulkanBase::drawFrame()
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
+	if (vkQueueSubmit(QueueManager::GetInstance().GetGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
 
@@ -83,7 +83,7 @@ void VulkanBase::drawFrame()
 
 	presentInfo.pImageIndices = &imageIndex;
 
-	vkQueuePresentKHR(presentQueue, &presentInfo);
+	vkQueuePresentKHR(QueueManager::GetInstance().GetPresentationQueue(), &presentInfo);
 }
 
 bool checkValidationLayerSupport() {

@@ -58,8 +58,8 @@ public:
 	{
 		auto vertexInputInfo = std::make_unique<VkPipelineVertexInputStateCreateInfo>();
 		vertexInputInfo->sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		auto bindingDescription = Vertex::getBindingDescription();
-		auto attributeDescriptions = Vertex::getAttributeDescriptions();
+		auto bindingDescription = Vertex2D::getBindingDescription();
+		auto attributeDescriptions = Vertex2D::getAttributeDescriptions();
 
 		vertexInputInfo->vertexBindingDescriptionCount = 1;
 		vertexInputInfo->vertexAttributeDescriptionCount = static_cast<uint32_t>(2);

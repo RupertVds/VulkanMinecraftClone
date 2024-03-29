@@ -18,6 +18,7 @@
 #include <CommandBuffer.h>
 #include <CommandPool.h>
 #include <Mesh2D.h>
+#include <QueueManager.h>
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -43,10 +44,10 @@ public:
 	}
 
 private:
-	const std::vector<Vertex> vertices = {
-	{{0.0f, -0.5f, 0.f}, {0.5f, 1.0f, 1.0f}},
-	{{0.5f, 0.5f, 0.f}, {0.0f, 1.0f, 0.0f}},
-	{{-0.5f, 0.5f, 0.f}, {0.0f, 0.0f, 1.0f}}
+	const std::vector<Vertex2D> vertices = {
+	{{0.0f, -0.5f}, {0.5f, 1.0f, 1.0f}},
+	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 	};
 
 	void initVulkan() {
@@ -74,7 +75,8 @@ private:
 
 
 		// week 02
-		m_CommandPool.Initialize(device, findQueueFamilies(physicalDevice));
+		//m_CommandPool.Initialize(device, findQueueFamilies(physicalDevice));
+		m_CommandPool.Initialize(device, QueueManager::GetInstance().FindQueueFamilies(physicalDevice, surface));
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
 
 
@@ -159,7 +161,7 @@ private:
 	CommandBuffer m_CommandBuffer;
 	// ===========================
 
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+	//QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 	void drawFrame(uint32_t imageIndex);
 	//void createCommandBuffer();
@@ -201,8 +203,8 @@ private:
 	// Logical and physical device
 
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
+	//VkQueue graphicsQueue;
+	//VkQueue presentQueue;
 	
 	void pickPhysicalDevice();
 	bool isDeviceSuitable(VkPhysicalDevice device);

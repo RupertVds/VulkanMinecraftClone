@@ -122,10 +122,6 @@ void VulkanBase::createGraphicsPipeline()
 	pipelineInfo.pStages = shaderStages.data();
 	auto pvisci = m_MachineShader.createVertexInputStateInfo();
 	pipelineInfo.pVertexInputState = pvisci.get();
-	//pipelineInfo.pVertexInputState = pvisci.release();
-
-	// copy elision : C++20
-	// std::move ?
 
 	auto& piasci = m_MachineShader.createInputAssemblyStateInfo();
 	pipelineInfo.pInputAssemblyState = &piasci;
