@@ -17,7 +17,7 @@
 #include <MachineShader.h>
 #include <CommandBuffer.h>
 #include <CommandPool.h>
-#include <Mesh.h>
+#include <Mesh2D.h>
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -128,17 +128,11 @@ private:
 		glfwTerminate();
 	}
 
-	
-
-	
-
 	void createSurface() {
 		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface!");
 		}
 	}
-
-	
 
 	// Week 01: 
 	// Actual window

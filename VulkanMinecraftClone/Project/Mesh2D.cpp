@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "Mesh2D.h"
 #include <stdexcept>
 
 Mesh::Mesh(const std::vector<Vertex>& vertices)

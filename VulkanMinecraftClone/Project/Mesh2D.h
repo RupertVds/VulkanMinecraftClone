@@ -53,4 +53,22 @@ private:
 	VkBuffer m_VkBuffer;
 	VkDeviceMemory m_VkBufferMemory;
 	std::vector<Vertex> m_Vertices;
+
+	// all a mesh should contain:
+	// m_vertices
+	// m_indices
+	// m_vertexbuffer
+	// m_indexbuffer
+	// remove everything else
+	// special struct for specific data (for example world matrix of mesh)
+
+	// for primitives
+	// struct:
+	// position
+	// normal
+	// texcoord
+	
+	// addtriangle method-> used to create faces
+	// one with 3 indices
+	// another overload with 3 indices and an offset
 };

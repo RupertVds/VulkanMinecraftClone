@@ -1,48 +1,5 @@
 #include "vulkanbase/VulkanBase.h"
 
-//void VulkanBase::createCommandPool(){
-//	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
-//
-//	VkCommandPoolCreateInfo poolInfo{};
-//	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-//	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-//	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-//
-//	if (vkCreateCommandPool(device, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS) {
-//		throw std::runtime_error("failed to create command pool!");
-//	}
-//}
-
-//
-//void VulkanBase::createCommandBuffer() {
-//	VkCommandBufferAllocateInfo allocInfo{};
-//	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-//	allocInfo.commandPool = m_CommandPool;
-//	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-//	allocInfo.commandBufferCount = 1;
-//
-//	if (vkAllocateCommandBuffers(device, &allocInfo, &m_CommandBuffer) != VK_SUCCESS) {
-//		throw std::runtime_error("failed to allocate command buffers!");
-//	}
-//}
-
-//void VulkanBase::recordCommandBuffer(CommandBuffer commandBuffer, uint32_t imageIndex) {
-//	VkCommandBufferBeginInfo beginInfo{};
-//	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-//	beginInfo.flags = 0; // Optional
-//	beginInfo.pInheritanceInfo = nullptr; // Optional
-//
-//	if (vkBeginCommandBuffer(commandBuffer.GetVkCommandBuffer(), &beginInfo) != VK_SUCCESS) {
-//		throw std::runtime_error("failed to begin recording command buffer!");
-//	}
-//	drawFrame(imageIndex);
-//
-//
-//	if (vkEndCommandBuffer(commandBuffer.GetVkCommandBuffer()) != VK_SUCCESS) {
-//		throw std::runtime_error("failed to record command buffer!");
-//	}
-//}
-
 void VulkanBase::drawFrame(uint32_t imageIndex) {
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
