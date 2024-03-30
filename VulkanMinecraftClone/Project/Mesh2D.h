@@ -38,22 +38,21 @@ struct Vertex2D
 	}
 };
 
-class Mesh final
+class Mesh2D final
 {
 public:
-	Mesh(const std::vector<Vertex2D>& vertices);
-	~Mesh() = default;
-	
-	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device);
+	Mesh2D(const std::vector<Vertex2D>& vertices, VkPhysicalDevice physicalDevice, VkDevice device);
+	~Mesh2D() = default;
+
 	void DestroyMesh(VkDevice device);
 	void Draw(VkCommandBuffer buffer);
-	void AddVertex(glm::vec2 pos, glm::vec3 color);
 private:
+	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device);
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, VkPhysicalDeviceMemoryProperties memProperties, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	VkBuffer m_VkBuffer;
 	VkDeviceMemory m_VkBufferMemory;
 	std::vector<Vertex2D> m_Vertices;
-
+};
 	// all a mesh should contain:
 	// m_vertices
 	// m_indices
@@ -71,4 +70,3 @@ private:
 	// addtriangle method-> used to create faces
 	// one with 3 indices
 	// another overload with 3 indices and an offset
-};

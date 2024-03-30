@@ -81,6 +81,4 @@ void VulkanBase::createLogicalDevice() {
 	}
 
 	QueueManager::GetInstance().Initialize(device, physicalDevice, surface);
-	//vkGetDeviceQueue(device, indices.m_GraphicsFamily.value(), 0, &graphicsQueue);
-	//vkGetDeviceQueue(device, indices.m_PresentFamily.value(), 0, &presentQueue);
 }

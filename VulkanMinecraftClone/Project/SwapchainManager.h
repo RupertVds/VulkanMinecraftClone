@@ -7,9 +7,9 @@
 
 struct SwapChainSupportDetails 
 {
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
+    VkSurfaceCapabilitiesKHR m_Capabilities;
+    std::vector<VkSurfaceFormatKHR> m_Formats;
+    std::vector<VkPresentModeKHR> m_PresentModes;
 };
 
 struct GLFWwindow;
@@ -26,31 +26,31 @@ public:
     void Initialize(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, GLFWwindow* window);
     void Cleanup();
 
-    VkSwapchainKHR GetSwapchain() const { return swapChain; }
-    VkExtent2D GetSwapchainExtent() const { return swapChainExtent; }
-    VkFormat GetSwapchainImageFormat() const { return swapChainImageFormat; }
-    const std::vector<VkImageView>& GetImageViews() const { return swapChainImageViews; }
+    VkSwapchainKHR GetSwapchain() const { return m_SwapChain; }
+    VkExtent2D GetSwapchainExtent() const { return m_SwapChainExtent; }
+    VkFormat GetSwapchainImageFormat() const { return m_SwapChainImageFormat; }
+    const std::vector<VkImageView>& GetImageViews() const { return m_SwapChainImageViews; }
 
 private:
     SwapchainManager() = default;
     ~SwapchainManager() = default;
 
-    VkSwapchainKHR swapChain = VK_NULL_HANDLE;
-    VkExtent2D swapChainExtent{};
-    VkFormat swapChainImageFormat{};
-    std::vector<VkImage> swapChainImages{};
-    std::vector<VkImageView> swapChainImageViews{};
+    VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
+    VkExtent2D m_SwapChainExtent{};
+    VkFormat m_SwapChainImageFormat{};
+    std::vector<VkImage> m_SwapChainImages{};
+    std::vector<VkImageView> m_SwapChainImageViews{};
 
-    VkInstance instance = VK_NULL_HANDLE;
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-    VkDevice device = VK_NULL_HANDLE;
-    VkSurfaceKHR surface = VK_NULL_HANDLE;
-    GLFWwindow* window = nullptr;
+    VkInstance m_Instance = VK_NULL_HANDLE;
+    VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
+    VkDevice m_Device = VK_NULL_HANDLE;
+    VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
+    GLFWwindow* m_Window = nullptr;
 
-    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-    VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-    void createSwapChain();
-    void createImageViews();
+    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+    SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
+    VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+    void CreateSwapChain();
+    void CreateImageViews();
 };

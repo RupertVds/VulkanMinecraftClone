@@ -36,10 +36,10 @@ set(SOURCES
     "labwork/Week04.cpp" 
     "labwork/Week05.cpp"
     "labwork/Week06.cpp"
- "MachineShader.h" "Mesh2D.h" "Mesh2D.cpp" "CommandPool.h" "CommandPool.cpp" "CommandBuffer.h" "CommandBuffer.cpp" "QueueManager.h" "QueueManager.cpp" "SwapchainManager.h" "SwapchainManager.cpp")
+ "MachineShader.h" "Mesh2D.h" "Mesh2D.cpp" "CommandPool.h" "CommandPool.cpp" "CommandBuffer.h" "CommandBuffer.cpp" "QueueManager.h" "QueueManager.cpp" "SwapchainManager.h" "SwapchainManager.cpp" "Scene.h" "Scene.cpp" "VulkanBase.cpp" "Scene2D.h" "Scene2D.cpp")
 
 # Create the executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES} )
+add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "Mesh.h" "Mesh.cpp")
 add_dependencies(${PROJECT_NAME} Shaders)
 # Link libraries
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

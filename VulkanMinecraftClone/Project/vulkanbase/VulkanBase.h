@@ -20,6 +20,7 @@
 #include <Mesh2D.h>
 #include <QueueManager.h>
 #include <SwapchainManager.h>
+#include "Scene2D.h"
 
 const std::vector<const char*> validationLayers = 
 {
@@ -31,13 +32,6 @@ const std::vector<const char*> deviceExtensions =
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-//struct SwapChainSupportDetails 
-//{
-//	VkSurfaceCapabilitiesKHR capabilities;
-//	std::vector<VkSurfaceFormatKHR> formats;
-//	std::vector<VkPresentModeKHR> presentModes;
-//};
-
 class VulkanBase {
 public:
 	void run() {
@@ -48,13 +42,17 @@ public:
 	}
 
 private:
-	const std::vector<Vertex2D> vertices = {
+	const std::vector<Vertex2D> verticesTriangleOne = 
+	{
 	{{0.0f, -0.5f}, {0.5f, 1.0f, 1.0f}},
 	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 	};
 
-	void initVulkan() {
+	std::unique_ptr<Scene2D> m_Scene2D{};
+
+	void initVulkan() 
+	{
 		// week 06
 		createInstance();
 		setupDebugMessenger();
@@ -66,24 +64,39 @@ private:
 
 
 		// week 04 
-		//createSwapChain(window);
 		SwapchainManager::GetInstance().Initialize(instance, physicalDevice, device, surface, window);
-		//createImageViews();
-		
 		
 		// week 03
 		m_MachineShader.Initialize(device);
 		createRenderPass();
-		m_TriangleMesh.Initialize(physicalDevice, device);
+
+		m_Scene2D = std::make_unique<Scene2D>(device, physicalDevice);
+
+		Vertex2D v1{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} };
+		Vertex2D v2{ {0.5f, -0.5f} , {0.0f, 1.0f, 0.0f} };
+		Vertex2D v3{ {0.0f, 0.5f}  , {0.0f, 0.0f, 1.0f} };
+
+		m_Scene2D->AddTriangle(v1, v2, v3);
+
+		Vertex2D v4{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} };  
+		Vertex2D v5{ {-0.4f, -0.6f} , {0.0f, 1.0f, 1.0f} };
+		Vertex2D v6{ {-0.70f, 0.0f}  , {1.0f, 0.0f, 1.0f} };
+
+		m_Scene2D->AddTriangle(v4, v5, v6);
+
+		Vertex2D v7{ {1.f, 0.6f}, {1.0f, 1.0f, 0.0f} };
+		Vertex2D v8{ {0.5f, 0.6f} , {0.0f, 1.0f, 1.0f} };
+		Vertex2D v9{ {0.75f, 0.0f}  , {1.0f, 0.0f, 1.0f} };
+
+		m_Scene2D->AddTriangle(v7, v8, v9);
+
 		createGraphicsPipeline();
 		createFrameBuffers();
 
 
 		// week 02
-		//m_CommandPool.Initialize(device, findQueueFamilies(physicalDevice));
 		m_CommandPool.Initialize(device, QueueManager::GetInstance().FindQueueFamilies(physicalDevice, surface));
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
-
 
 		// week 06
 		createSyncObjects();
@@ -118,17 +131,12 @@ private:
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 		vkDestroyRenderPass(device, renderPass, nullptr);
 
-		//for (auto imageView : swapChainImageViews) {
-		//	vkDestroyImageView(device, imageView, nullptr);
-		//}
-
 		if (enableValidationLayers) {
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		}
 		SwapchainManager::GetInstance().Cleanup();
-		//vkDestroySwapchainKHR(device, swapChain, nullptr);
-		
-		m_TriangleMesh.DestroyMesh(device);
+	
+		m_Scene2D->CleanUp();
 
 		vkDestroyDevice(device, nullptr);
 
@@ -139,8 +147,10 @@ private:
 		glfwTerminate();
 	}
 
-	void createSurface() {
-		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+	void createSurface() 
+	{
+		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to create window surface!");
 		}
 	}
@@ -170,17 +180,11 @@ private:
 	CommandBuffer m_CommandBuffer;
 	// ===========================
 
-	//QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
 	void drawFrame(uint32_t imageIndex);
-	//void createCommandBuffer();
-	//void createCommandPool(); 
-	//void recordCommandBuffer(CommandBuffer commandBuffer, uint32_t imageIndex);
 	
 	// Week 03
 	// Renderpass concept
 	// Graphics pipeline
-	Mesh m_TriangleMesh{vertices};
 	
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 	VkPipelineLayout pipelineLayout;
@@ -193,20 +197,6 @@ private:
 
 	// Week 04
 	// Swap chain and image view support
-
-	//VkSwapchainKHR swapChain;
-	//std::vector<VkImage> swapChainImages;
-	//VkFormat swapChainImageFormat;
-	//VkExtent2D swapChainExtent;
-
-	//std::vector<VkImageView> swapChainImageViews;
-
-	//SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-	//VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	//VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-	//VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	//void createSwapChain();
-	//void createImageViews();
 
 	// Week 05 
 	// Logical and physical device

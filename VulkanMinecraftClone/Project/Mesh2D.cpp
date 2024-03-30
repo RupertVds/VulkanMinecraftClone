@@ -1,15 +1,16 @@
 #include "Mesh2D.h"
 #include <stdexcept>
 
-Mesh::Mesh(const std::vector<Vertex2D>& vertices)
+Mesh2D::Mesh2D(const std::vector<Vertex2D>& vertices, VkPhysicalDevice physicalDevice, VkDevice device)
     :
     m_Vertices{vertices},
     m_VkBuffer{VK_NULL_HANDLE},
     m_VkBufferMemory{VK_NULL_HANDLE}
 {
+    Initialize(physicalDevice, device);
 }
 
-void Mesh::Initialize(VkPhysicalDevice physicalDevice, VkDevice device)
+void Mesh2D::Initialize(VkPhysicalDevice physicalDevice, VkDevice device)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -48,13 +49,13 @@ void Mesh::Initialize(VkPhysicalDevice physicalDevice, VkDevice device)
     vkUnmapMemory(device, m_VkBufferMemory);
 }
 
-void Mesh::DestroyMesh(VkDevice device)
+void Mesh2D::DestroyMesh(VkDevice device)
 {
     vkDestroyBuffer(device, m_VkBuffer, nullptr);
     vkFreeMemory(device, m_VkBufferMemory, nullptr);
 }
 
-void Mesh::Draw(VkCommandBuffer buffer)
+void Mesh2D::Draw(VkCommandBuffer buffer)
 {
     VkBuffer vertexBuffers[] = { m_VkBuffer };
     VkDeviceSize offsets[] = { 0 };
@@ -63,15 +64,12 @@ void Mesh::Draw(VkCommandBuffer buffer)
     vkCmdDraw(buffer, static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
 }
 
-void Mesh::AddVertex(glm::vec2 pos, glm::vec3 color)
-{
-}
-
-uint32_t Mesh::FindMemoryType(VkPhysicalDevice physicalDevice, VkPhysicalDeviceMemoryProperties memProperties, uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t Mesh2D::FindMemoryType(VkPhysicalDevice physicalDevice, VkPhysicalDeviceMemoryProperties memProperties, uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
     {
-        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) 
+        {
             return i;
         }
     }
