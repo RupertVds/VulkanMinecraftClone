@@ -16,7 +16,7 @@ public:
 	void Update() const;
 
 	void AddTriangle(const Vertex2D& v1, const Vertex2D& v2, const Vertex2D& v3);
-	void AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, const Vertex2D& bottomLeft, const Vertex2D& bottomRight);
+	void AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, const Vertex2D& bottomRight, const Vertex2D& bottomLeft);
 	void AddOval(const glm::vec2& position, float radiusX, float radiusY, uint32_t segments);
 	void CleanUp();
 private:

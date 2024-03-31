@@ -44,7 +44,7 @@ void Scene2D::AddTriangle(const Vertex2D& v1, const Vertex2D& v2, const Vertex2D
 	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
 }
 
-void Scene2D::AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, const Vertex2D& bottomLeft, const Vertex2D& bottomRight)
+void Scene2D::AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, const Vertex2D& bottomRight, const Vertex2D& bottomLeft)
 {
 	std::vector<Vertex2D> vertices = { topLeft, topRight, bottomRight, bottomLeft };
 	std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
