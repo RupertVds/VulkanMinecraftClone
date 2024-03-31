@@ -87,16 +87,13 @@ private:
 			{ {0.5f, 0.6f}, {0.0f, 1.0f, 1.0f} },
 			{ {0.75f, 0.0f}, {1.0f, 0.0f, 1.0f} });
 
-		//m_Scene2D->AddOval({ 0.f,0.f }, 0.3f, 0.3f, 40);
+		m_Scene2D->AddOval({ 0.f,0.f }, 0.8f, 0.3f, 50, {0.f, 0.5f, 1.f});
 
-
-
-
-		m_Scene2D->AddRectangle
-		({	{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}});
+		//m_Scene2D->AddRectangle
+		//({	{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		//	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+		//	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+		//	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}});
 
 		createGraphicsPipeline();
 		createFrameBuffers();

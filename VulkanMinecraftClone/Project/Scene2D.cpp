@@ -52,18 +52,33 @@ void Scene2D::AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, co
 	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
 }
 
-void Scene2D::AddOval(const glm::vec2& position, float radiusX, float radiusY, uint32_t segments)
+void Scene2D::AddOval(const glm::vec2& position, float radiusX, float radiusY, uint32_t segments, const glm::vec3& color)
 {
 	std::vector<Vertex2D> vertices;
 	std::vector<uint16_t> indices;
 	float thetaIncrement = 2.0f * PI / static_cast<float>(segments);
+
+	// Center vertex
+	vertices.emplace_back(Vertex2D{ position, color });
+
+	// Generate vertices along the ellipse
 	for (uint16_t i = 0; i <= segments; ++i) {
 		float theta = i * thetaIncrement;
 		float x = position.x + radiusX * std::cos(theta);
 		float y = position.y + radiusY * std::sin(theta);
-		vertices.emplace_back(Vertex2D{ glm::vec2(x, y), glm::vec3(1.0f, 1.0f, 1.0f) });
-		indices.push_back(i);
+		vertices.emplace_back(Vertex2D{ glm::vec2(x, y), color });
 	}
+
+	// Generate indices for triangles covering the oval area
+	for (uint16_t i = 1; i < segments; ++i) {
+		indices.emplace_back(0); // Center vertex
+		indices.emplace_back(i);
+		indices.emplace_back(i + 1);
+	}
+	// Connect last vertex to the first one
+	indices.emplace_back(0); // Center vertex
+	indices.emplace_back(segments);
+	indices.emplace_back(1);
 
 	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
 }

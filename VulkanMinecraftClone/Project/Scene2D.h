@@ -17,7 +17,7 @@ public:
 
 	void AddTriangle(const Vertex2D& v1, const Vertex2D& v2, const Vertex2D& v3);
 	void AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, const Vertex2D& bottomRight, const Vertex2D& bottomLeft);
-	void AddOval(const glm::vec2& position, float radiusX, float radiusY, uint32_t segments);
+	void AddOval(const glm::vec2& position, float radiusX, float radiusY, uint32_t segments, const glm::vec3& color);
 	void CleanUp();
 private:
 	std::vector<std::unique_ptr<Mesh2D>> m_Meshes;
