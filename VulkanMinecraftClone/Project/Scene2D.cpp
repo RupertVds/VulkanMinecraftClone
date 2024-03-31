@@ -1,4 +1,9 @@
 #include "Scene2D.h"
+#include <glm/glm.hpp>
+#include <cmath> // For std::cos, std::sin
+
+// Define pi manually
+constexpr float PI = 3.14159265358979323846f;
 
 Scene2D::Scene2D(VkDevice device, VkPhysicalDevice physicalDevice)
 	:
@@ -31,8 +36,36 @@ void Scene2D::AddTriangle(const Vertex2D& v1, const Vertex2D& v2, const Vertex2D
 	// Create a vector of vertices for the triangle
 	std::vector<Vertex2D> vertices = { v1, v2, v3 };
 
-	// Create a new Mesh2D object with the vertices and add it to the vector of meshes
-	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, m_PhysicalDevice, m_Device));
+	// Create a vector of indices for the triangle
+	std::vector<uint16_t> indices = { 0, 1, 2 };
+
+	// Create a new Mesh2D object with the vertices and indices, and add it to the vector of meshes
+	//m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
+	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
+}
+
+void Scene2D::AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, const Vertex2D& bottomLeft, const Vertex2D& bottomRight)
+{
+	std::vector<Vertex2D> vertices = { topLeft, topRight, bottomRight, bottomLeft };
+	std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
+
+	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
+}
+
+void Scene2D::AddOval(const glm::vec2& position, float radiusX, float radiusY, uint32_t segments)
+{
+	std::vector<Vertex2D> vertices;
+	std::vector<uint16_t> indices;
+	float thetaIncrement = 2.0f * PI / static_cast<float>(segments);
+	for (uint16_t i = 0; i <= segments; ++i) {
+		float theta = i * thetaIncrement;
+		float x = position.x + radiusX * std::cos(theta);
+		float y = position.y + radiusY * std::sin(theta);
+		vertices.emplace_back(Vertex2D{ glm::vec2(x, y), glm::vec3(1.0f, 1.0f, 1.0f) });
+		indices.push_back(i);
+	}
+
+	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
 }
 
 void Scene2D::CleanUp()

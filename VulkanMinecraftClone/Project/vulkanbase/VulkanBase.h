@@ -72,27 +72,31 @@ private:
 
 		m_Scene2D = std::make_unique<Scene2D>(device, physicalDevice);
 
-		Vertex2D v1{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} };
-		Vertex2D v2{ {0.5f, -0.5f} , {0.0f, 1.0f, 0.0f} };
-		Vertex2D v3{ {0.0f, 0.5f}  , {0.0f, 0.0f, 1.0f} };
+		//m_Scene2D->AddTriangle(
+		//	{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} }, 
+		//	{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} }, 
+		//	{ {0.0f, 0.5f}, {0.0f, 0.0f, 1.0f} });
 
-		m_Scene2D->AddTriangle(v1, v2, v3);
+		//m_Scene2D->AddTriangle(
+		//	{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} }, 
+		//	{ {-0.4f, -0.6f}, {0.0f, 1.0f, 1.0f} }, 
+		//	{ {-0.70f, 0.0f}, {1.0f, 0.0f, 1.0f} });
 
-		Vertex2D v4{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} };  
-		Vertex2D v5{ {-0.4f, -0.6f} , {0.0f, 1.0f, 1.0f} };
-		Vertex2D v6{ {-0.70f, 0.0f}  , {1.0f, 0.0f, 1.0f} };
+		m_Scene2D->AddTriangle(
+			{ {1.f, 0.6f}, {1.0f, 1.0f, 0.0f} },
+			{ {0.5f, 0.6f}, {0.0f, 1.0f, 1.0f} },
+			{ {0.75f, 0.0f}, {1.0f, 0.0f, 1.0f} });
 
-		m_Scene2D->AddTriangle(v4, v5, v6);
+		//m_Scene2D->AddOval({ 0,0 }, 0.3, 40);
 
-		Vertex2D v7{ {1.f, 0.6f}, {1.0f, 1.0f, 0.0f} };
-		Vertex2D v8{ {0.5f, 0.6f} , {0.0f, 1.0f, 1.0f} };
-		Vertex2D v9{ {0.75f, 0.0f}  , {1.0f, 0.0f, 1.0f} };
-
-		m_Scene2D->AddTriangle(v7, v8, v9);
+		//m_Scene2D->AddRectangle(
+		//		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		//		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+		//		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+		//		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}});
 
 		createGraphicsPipeline();
 		createFrameBuffers();
-
 
 		// week 02
 		m_CommandPool.Initialize(device, QueueManager::GetInstance().FindQueueFamilies(physicalDevice, surface));

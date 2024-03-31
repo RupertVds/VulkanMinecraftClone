@@ -41,17 +41,22 @@ struct Vertex2D
 class Mesh2D final
 {
 public:
-	Mesh2D(const std::vector<Vertex2D>& vertices, VkPhysicalDevice physicalDevice, VkDevice device);
+	Mesh2D(const std::vector<Vertex2D>& vertices, const std::vector<uint16_t>& indices, VkPhysicalDevice physicalDevice, VkDevice device);
 	~Mesh2D() = default;
 
 	void DestroyMesh(VkDevice device);
 	void Draw(VkCommandBuffer buffer);
 private:
 	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device);
-	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, VkPhysicalDeviceMemoryProperties memProperties, uint32_t typeFilter, VkMemoryPropertyFlags properties);
-	VkBuffer m_VkBuffer;
-	VkDeviceMemory m_VkBufferMemory;
+	void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice);
+	void CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice);
+
+	VkBuffer m_VkVertexBuffer;
+	VkDeviceMemory m_VkVertexBufferMemory;
+	VkBuffer m_VkIndexBuffer;
+	VkDeviceMemory m_VkIndexBufferMemory;
 	std::vector<Vertex2D> m_Vertices;
+	std::vector<uint16_t> m_Indices;
 };
 	// all a mesh should contain:
 	// m_vertices
