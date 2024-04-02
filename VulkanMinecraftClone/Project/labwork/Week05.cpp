@@ -30,8 +30,9 @@ void VulkanBase::pickPhysicalDevice() {
 bool VulkanBase::isDeviceSuitable(VkPhysicalDevice device) {
 	QueueFamilyIndices indices = QueueManager::GetInstance().FindQueueFamilies(device, surface);
 	bool extensionsSupported = checkDeviceExtensionSupport(device);
-	return indices.isComplete() && extensionsSupported;
 
+
+	return indices.isComplete() && extensionsSupported;
 }
 
 void VulkanBase::createLogicalDevice() {

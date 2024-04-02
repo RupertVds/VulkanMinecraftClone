@@ -5,10 +5,10 @@
 #include "vulkanbase/VulkanUtil.h"
 #include "Mesh2D.h"
 
-class MachineShader final
+class Shader final
 {
 public:
-	MachineShader(
+	Shader(
 		const std::string& vertexShaderFile,
 		const std::string& fragmentShaderFile
 	) :	m_VertexShaderFile{vertexShaderFile},
@@ -102,7 +102,7 @@ public:
 		}
 	}
 
-	~MachineShader() = default;
+	~Shader() = default;
 private:
 	std::string m_VertexShaderFile;
 	std::string m_FragmentShaderFile;

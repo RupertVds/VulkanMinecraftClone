@@ -124,6 +124,7 @@ void SwapchainManager::CreateSwapChain()
 	createInfo.imageExtent = extent;
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	
 
 	QueueFamilyIndices indices = QueueManager::GetInstance().FindQueueFamilies(m_PhysicalDevice, m_Surface);
 	uint32_t queueFamilyIndices[] = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
@@ -168,7 +169,7 @@ void SwapchainManager::CreateImageViews()
 		VkImageViewCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		createInfo.image = m_SwapChainImages[i];
-		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;	
 		createInfo.format = m_SwapChainImageFormat;
 		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;

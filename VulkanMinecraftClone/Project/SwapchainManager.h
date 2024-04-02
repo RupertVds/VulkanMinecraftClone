@@ -32,6 +32,7 @@ public:
     const std::vector<VkImageView>& GetImageViews() const { return m_SwapChainImageViews; }
 
 private:
+    SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
     SwapchainManager() = default;
     ~SwapchainManager() = default;
 
@@ -48,7 +49,6 @@ private:
     GLFWwindow* m_Window = nullptr;
 
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-    SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
     VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void CreateSwapChain();

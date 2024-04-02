@@ -21,6 +21,8 @@
 #include <QueueManager.h>
 #include <SwapchainManager.h>
 #include "Scene2D.h"
+#include <BasicGraphicsPipeline2D.h>
+#include <RenderPass.h>
 
 const std::vector<const char*> validationLayers = 
 {
@@ -42,14 +44,21 @@ public:
 	}
 
 private:
-	const std::vector<Vertex2D> verticesTriangleOne = 
-	{
-	{{0.0f, -0.5f}, {0.5f, 1.0f, 1.0f}},
-	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-	};
+	GLFWwindow* window;
+
+	CommandPool m_CommandPool;
+	CommandBuffer m_CommandBuffer;
+
+	std::vector<VkFramebuffer> swapChainFramebuffers;
+
+	//VkRenderPass renderPass;
+	std::unique_ptr<RenderPass> m_RenderPass2D;
+
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
 
 	std::unique_ptr<Scene2D> m_Scene2D{};
+	std::unique_ptr<BasicGraphicsPipeline2D> m_BasicGraphicsPipeline2D;
 
 	void initVulkan() 
 	{
@@ -67,35 +76,38 @@ private:
 		SwapchainManager::GetInstance().Initialize(instance, physicalDevice, device, surface, window);
 		
 		// week 03
-		m_MachineShader.Initialize(device);
-		createRenderPass();
+		//m_MachineShader.Initialize(device);
+		m_RenderPass2D = std::make_unique<RenderPass>(device);
+		//createRenderPass();
 
 		m_Scene2D = std::make_unique<Scene2D>(device, physicalDevice);
 
-		//m_Scene2D->AddTriangle(
-		//	{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} }, 
-		//	{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} }, 
-		//	{ {0.0f, 0.5f}, {0.0f, 0.0f, 1.0f} });
+		m_Scene2D->AddTriangle(
+			{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} }, 
+			{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} }, 
+			{ {0.0f, 0.5f}, {0.0f, 0.0f, 1.0f} });
 
-		//m_Scene2D->AddTriangle(
-		//	{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} }, 
-		//	{ {-0.4f, -0.6f}, {0.0f, 1.0f, 1.0f} }, 
-		//	{ {-0.70f, 0.0f}, {1.0f, 0.0f, 1.0f} });
+		m_Scene2D->AddTriangle(
+			{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} }, 
+			{ {-0.4f, -0.6f}, {0.0f, 1.0f, 1.0f} }, 
+			{ {-0.70f, 0.0f}, {1.0f, 0.0f, 1.0f} });
 
 		m_Scene2D->AddTriangle(
 			{ {1.f, 0.6f}, {1.0f, 1.0f, 0.0f} },
 			{ {0.5f, 0.6f}, {0.0f, 1.0f, 1.0f} },
 			{ {0.75f, 0.0f}, {1.0f, 0.0f, 1.0f} });
 
-		m_Scene2D->AddOval({ 0.f,0.f }, 0.8f, 0.3f, 50, {0.f, 0.5f, 1.f});
+		m_Scene2D->AddOval({ 0.f,0.f }, 0.3f, 0.3f, 50, {0.f, 0.5f, 1.f});
 
-		//m_Scene2D->AddRectangle
-		//({	{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		//	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-		//	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-		//	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}});
+		m_Scene2D->AddRectangle
+		({	{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}});
 
-		createGraphicsPipeline();
+		m_BasicGraphicsPipeline2D = std::make_unique<BasicGraphicsPipeline2D>(device, m_RenderPass2D->GetHandle(), "shaders/shader2D.vert.spv",
+			"shaders/shader2D.frag.spv");
+
 		createFrameBuffers();
 
 		// week 02
@@ -123,17 +135,16 @@ private:
 		vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
 		vkDestroyFence(device, inFlightFence, nullptr);
 
-		//vkDestroyCommandPool(device, m_CommandPool, nullptr);
 		m_CommandPool.Destroy();
 		
-
 		for (auto framebuffer : swapChainFramebuffers) {
 			vkDestroyFramebuffer(device, framebuffer, nullptr);
 		}
 
-		vkDestroyPipeline(device, graphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-		vkDestroyRenderPass(device, renderPass, nullptr);
+
+		m_BasicGraphicsPipeline2D->DestroyPipeline(device);
+
+		m_RenderPass2D->Destroy(device);
 
 		if (enableValidationLayers) {
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
@@ -159,55 +170,11 @@ private:
 		}
 	}
 
-	// Week 01: 
-	// Actual window
-	// simple fragment + vertex shader creation functions
-	// These 5 functions should be refactored into a separate C++ class
-	// with the correct internal state.
-
-	GLFWwindow* window;
-	// important to initialize before creating the graphics pipeline
-	MachineShader m_MachineShader{
-		"shaders/shader.vert.spv", 
-		"shaders/shader.frag.spv" 
-	};
 	void initWindow();
-	void drawScene();
-
-	// Week 02
-	// Queue families
-	// CommandBuffer concept
-	// 
-	// ===========================
-	CommandPool m_CommandPool;
-	// ===========================
-	CommandBuffer m_CommandBuffer;
-	// ===========================
-
-	void drawFrame(uint32_t imageIndex);
-	
-	// Week 03
-	// Renderpass concept
-	// Graphics pipeline
-	
-	std::vector<VkFramebuffer> swapChainFramebuffers;
-	VkPipelineLayout pipelineLayout;
-	VkPipeline graphicsPipeline;
-	VkRenderPass renderPass;
+	void drawFrame(uint32_t imageIndex);	
 
 	void createFrameBuffers();
-	void createRenderPass();
-	void createGraphicsPipeline();
-
-	// Week 04
-	// Swap chain and image view support
-
-	// Week 05 
-	// Logical and physical device
-
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-	//VkQueue graphicsQueue;
-	//VkQueue presentQueue;
+	//void createRenderPass();
 	
 	void pickPhysicalDevice();
 	bool isDeviceSuitable(VkPhysicalDevice device);
