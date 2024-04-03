@@ -5,10 +5,11 @@
 // Define pi manually
 constexpr float PI = 3.14159265358979323846f;
 
-Scene2D::Scene2D(VkDevice device, VkPhysicalDevice physicalDevice)
+Scene2D::Scene2D(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
 	:
 	m_Device{ device },
-	m_PhysicalDevice{ physicalDevice }
+	m_PhysicalDevice{ physicalDevice },
+	m_CommandPool{ commandPool }
 {
 }
 
@@ -41,7 +42,7 @@ void Scene2D::AddTriangle(const Vertex2D& v1, const Vertex2D& v2, const Vertex2D
 
 	// Create a new Mesh2D object with the vertices and indices, and add it to the vector of meshes
 	//m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
-	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
+	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device, m_CommandPool));
 }
 
 void Scene2D::AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, const Vertex2D& bottomRight, const Vertex2D& bottomLeft)
@@ -49,7 +50,7 @@ void Scene2D::AddRectangle(const Vertex2D& topLeft, const Vertex2D& topRight, co
 	std::vector<Vertex2D> vertices = { topLeft, topRight, bottomRight, bottomLeft };
 	std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
 
-	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
+	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device, m_CommandPool));
 }
 
 void Scene2D::AddOval(const glm::vec2& position, float radiusX, float radiusY, uint32_t segments, const glm::vec3& color)
@@ -80,7 +81,7 @@ void Scene2D::AddOval(const glm::vec2& position, float radiusX, float radiusY, u
 	indices.emplace_back(segments);
 	indices.emplace_back(1);
 
-	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device));
+	m_Meshes.emplace_back(std::make_unique<Mesh2D>(vertices, indices, m_PhysicalDevice, m_Device, m_CommandPool));
 }
 
 void Scene2D::CleanUp()

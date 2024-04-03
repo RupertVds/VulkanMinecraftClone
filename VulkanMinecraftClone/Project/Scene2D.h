@@ -5,7 +5,7 @@
 class Scene2D final
 {
 public:
-	Scene2D(VkDevice device, VkPhysicalDevice physicalDevice);
+	Scene2D(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
 	~Scene2D();
 	Scene2D(const Scene2D& other) = delete;
 	Scene2D& operator=(const Scene2D& other) = delete;
@@ -23,4 +23,5 @@ private:
 	std::vector<std::unique_ptr<Mesh2D>> m_Meshes;
 	VkDevice m_Device;
 	VkPhysicalDevice m_PhysicalDevice;
+	VkCommandPool m_CommandPool;
 };

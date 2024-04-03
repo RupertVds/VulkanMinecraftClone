@@ -13,10 +13,12 @@ public:
 	~CommandPool() = default;
 
 	void Initialize(const VkDevice& device, const QueueFamilyIndices& queue);
+	VkCommandPool GetHandle() { return m_CommandPool; }
 	void Destroy();
 
 	CommandBuffer CreateCommandBuffer() const;
 private:
 	VkCommandPool m_CommandPool;
+	//TODO: work this device away maybe
 	VkDevice m_VkDevice;
 };

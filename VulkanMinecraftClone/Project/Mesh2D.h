@@ -38,18 +38,26 @@ struct Vertex2D
 	}
 };
 
+class CommandPool;
+
 class Mesh2D final
 {
 public:
-	Mesh2D(const std::vector<Vertex2D>& vertices, const std::vector<uint16_t>& indices, VkPhysicalDevice physicalDevice, VkDevice device);
+	Mesh2D(
+		const std::vector<Vertex2D>& vertices, 
+		const std::vector<uint16_t>& indices, 
+		VkPhysicalDevice physicalDevice, 
+		VkDevice device,
+		VkCommandPool commandPool
+	);
 	~Mesh2D() = default;
 
 	void DestroyMesh(VkDevice device);
 	void Draw(VkCommandBuffer buffer);
 private:
-	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device);
-	void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice);
-	void CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice);
+	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool);
+	void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
+	void CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
 
 	VkBuffer m_VkVertexBuffer;
 	VkDeviceMemory m_VkVertexBufferMemory;

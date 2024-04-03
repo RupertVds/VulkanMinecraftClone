@@ -31,8 +31,6 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 
 	m_Scene2D->Render(m_CommandBuffer.GetVkCommandBuffer());
-
-	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 	
 	m_RenderPass2D->End(m_CommandBuffer);
 }
