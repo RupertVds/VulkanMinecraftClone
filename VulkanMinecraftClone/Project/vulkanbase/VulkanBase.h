@@ -103,28 +103,23 @@ private:
 
 		m_Scene2D = std::make_unique<Scene2D>(device, physicalDevice, m_CommandPool.GetHandle());
 
-		//m_Scene2D->AddTriangle(
-		//	{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} },
-		//	{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} },
-		//	{ {0.0f, 0.5f}, {0.0f, 0.0f, 1.0f} });
-
-		//m_Scene2D->AddTriangle(
-		//	{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} },
-		//	{ {-0.4f, -0.6f}, {0.0f, 1.0f, 1.0f} },
-		//	{ {-0.70f, 0.0f}, {1.0f, 0.0f, 1.0f} });
+		m_Scene2D->AddTriangle(
+			{ {-0.95f, 0.9f}, {1.0f, 0.0f, 0.0f} },
+			{ {-0.9f, 0.80f}, {0.0f, 1.0f, 0.0f} },
+			{ {-0.85f, 0.9f}, {0.0f, 0.0f, 1.0f} });
 
 		m_Scene2D->AddTriangle(
-			{ {1.f, 0.6f}, {1.0f, 0.0f, 0.0f} },
-			{ {0.5f, 0.6f}, {0.0f, 1.0f, 0.0f} },
-			{ {0.75f, 0.0f}, {0.0f, 0.0f, 1.0f} });
+			{ {-0.80f, 0.9f}, {1.0f, 0.0f, 1.0f} },
+			{ {-0.75f, 0.80f}, {1.0f, 1.0f, 0.0f} },
+			{ {-0.70f, 0.9f}, {0.0f, 1.0f, 1.0f} });
 
-		//m_Scene2D->AddOval({ 0.f,0.f }, 0.3f, 0.3f, 50, { 0.f, 0.5f, 1.f });
+		m_Scene2D->AddOval({ -0.90f, 0.7f }, 0.05f, 0.05f, 50, { 0.5f, 1.f, 1.f });
 
-		//m_Scene2D->AddRectangle
-		//({ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} },
-		//	{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} },
-		//	{ {0.5f, 0.5f}, {0.0f, 0.0f, 1.0f} },
-		//	{ {-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f} });
+		m_Scene2D->AddRectangle(
+			{ {-0.80f, 0.65f}, {1.0f, 0.0f, 0.0f} },
+			{ {-0.70f, 0.65f}, {0.0f, 1.0f, 0.0f} },
+			{ {-0.70f, 0.75f}, {0.0f, 0.0f, 1.0f} },
+			{ {-0.80f, 0.75f}, {1.0f, 1.0f, 1.0f} });
 
 		m_Scene3D = std::make_unique<Scene>(device, physicalDevice, m_CommandPool.GetHandle());
 		m_Scene3D->AddTriangle(
