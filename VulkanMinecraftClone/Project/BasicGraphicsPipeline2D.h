@@ -81,10 +81,10 @@ public:
 
 		pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
 		pipelineInfo.pStages = shaderStages.data();
-		auto pvisci = m_Shaders.createVertexInputStateInfo();
+		auto pvisci = m_Shaders.CreateVertexInputStateInfo2D();
 		pipelineInfo.pVertexInputState = pvisci.get();
 
-		auto& piasci = m_Shaders.createInputAssemblyStateInfo();
+		auto& piasci = m_Shaders.CreateInputAssemblyStateInfo();
 		pipelineInfo.pInputAssemblyState = &piasci;
 
 		pipelineInfo.pViewportState = &viewportState;

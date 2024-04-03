@@ -49,6 +49,8 @@ void VulkanBase::drawFrame()
 	auto swapChain = SwapchainManager::GetInstance().GetSwapchain();
 	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
+	m_GraphicsPipeline3D->UpdateUniformBuffer(device, imageIndex);
+	
 	// Combine this to record buffer?
 	m_CommandBuffer.Reset();
 	m_CommandBuffer.BeginRecording();

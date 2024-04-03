@@ -26,13 +26,18 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 	scissor.extent = swapChainExtent;
 	vkCmdSetScissor(m_CommandBuffer.GetVkCommandBuffer(), 0, 1, &scissor);
 
-	m_RenderPass2D->Begin(m_CommandBuffer, swapChainFramebuffers, imageIndex);
+	m_RenderPass->Begin(m_CommandBuffer, swapChainFramebuffers, imageIndex);
 
 	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 
 	m_Scene2D->Render(m_CommandBuffer.GetVkCommandBuffer());
-	
-	m_RenderPass2D->End(m_CommandBuffer);
+
+	m_GraphicsPipeline3D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
+	m_GraphicsPipeline3D->BindDescriptorSets(m_CommandBuffer.GetVkCommandBuffer(), imageIndex);
+
+	m_Scene3D->Render(m_CommandBuffer.GetVkCommandBuffer());
+
+	m_RenderPass->End(m_CommandBuffer);
 }
 
 void VulkanBase::createFrameBuffers()
@@ -45,7 +50,7 @@ void VulkanBase::createFrameBuffers()
 
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = m_RenderPass2D->GetHandle();
+		framebufferInfo.renderPass = m_RenderPass->GetHandle();
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = attachments;
 		framebufferInfo.width = SwapchainManager::GetInstance().GetSwapchainExtent().width;

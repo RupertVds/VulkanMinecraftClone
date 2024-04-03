@@ -4,6 +4,7 @@
 #include <vector>
 #include "vulkanbase/VulkanUtil.h"
 #include "Mesh2D.h"
+#include "Mesh.h"
 
 class Shader final
 {
@@ -21,15 +22,15 @@ public:
 	void Initialize(const VkDevice& device)
 	{
 		m_ShaderStages.clear();
-		m_ShaderStages.emplace_back(createVertexShaderInfo(device));
-		m_ShaderStages.emplace_back(createFragmentShaderInfo(device));
+		m_ShaderStages.emplace_back(CreateVertexShaderInfo(device));
+		m_ShaderStages.emplace_back(CreateFragmentShaderInfo(device));
 	}
 	inline std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages(){	return m_ShaderStages; }
 
 	//"shaders/shader.frag.spv"
-	VkPipelineShaderStageCreateInfo createFragmentShaderInfo(const VkDevice& device) {
+	VkPipelineShaderStageCreateInfo CreateFragmentShaderInfo(const VkDevice& device) {
 		std::vector<char> fragShaderCode = readFile(m_FragmentShaderFile);
-		VkShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
+		VkShaderModule fragShaderModule = CreateShaderModule(device, fragShaderCode);
 
 		VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
 		fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -41,9 +42,9 @@ public:
 	}
 
 	//"shaders/shader.vert.spv"
-	VkPipelineShaderStageCreateInfo createVertexShaderInfo(const VkDevice& device) {
+	VkPipelineShaderStageCreateInfo CreateVertexShaderInfo(const VkDevice& device) {
 		std::vector<char> vertShaderCode = readFile(m_VertexShaderFile);
-		VkShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
+		VkShaderModule vertShaderModule = CreateShaderModule(device, vertShaderCode);
 
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 		vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -54,7 +55,7 @@ public:
 		return vertShaderStageInfo;
 	}
 
-	std::unique_ptr<VkPipelineVertexInputStateCreateInfo> createVertexInputStateInfo()
+	std::unique_ptr<VkPipelineVertexInputStateCreateInfo> CreateVertexInputStateInfo2D()
 	{
 		auto vertexInputInfo = std::make_unique<VkPipelineVertexInputStateCreateInfo>();
 		vertexInputInfo->sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -70,7 +71,23 @@ public:
 		return vertexInputInfo;
 	}
 
-	VkPipelineInputAssemblyStateCreateInfo createInputAssemblyStateInfo()
+	std::unique_ptr<VkPipelineVertexInputStateCreateInfo> CreateVertexInputStateInfo()
+	{
+		auto vertexInputInfo = std::make_unique<VkPipelineVertexInputStateCreateInfo>();
+		vertexInputInfo->sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		auto bindingDescription = Vertex::getBindingDescription();
+		auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+		vertexInputInfo->vertexBindingDescriptionCount = 1;
+		vertexInputInfo->vertexAttributeDescriptionCount = static_cast<uint32_t>(2);
+		vertexInputInfo->pVertexBindingDescriptions = bindingDescription.release();
+		vertexInputInfo->pVertexAttributeDescriptions = attributeDescriptions.release();
+		vertexInputInfo->flags = 0;
+
+		return vertexInputInfo;
+	}
+
+	VkPipelineInputAssemblyStateCreateInfo CreateInputAssemblyStateInfo()
 	{
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -79,7 +96,7 @@ public:
 		return inputAssembly;
 	}
 
-	VkShaderModule createShaderModule(const VkDevice& device, const std::vector<char>& code) 
+	VkShaderModule CreateShaderModule(const VkDevice& device, const std::vector<char>& code) 
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

@@ -23,6 +23,8 @@
 #include "Scene2D.h"
 #include <BasicGraphicsPipeline2D.h>
 #include <RenderPass.h>
+#include <GraphicsPipeline3D.h>
+#include <Scene.h>
 
 const std::vector<const char*> validationLayers = 
 {
@@ -52,13 +54,16 @@ private:
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 
 	//VkRenderPass renderPass;
-	std::unique_ptr<RenderPass> m_RenderPass2D;
+	std::unique_ptr<RenderPass> m_RenderPass;
+	//std::unique_ptr<RenderPass> m_RenderPass3D;
 
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
 
 	std::unique_ptr<Scene2D> m_Scene2D{};
+	std::unique_ptr<Scene> m_Scene3D{};
 	std::unique_ptr<BasicGraphicsPipeline2D> m_BasicGraphicsPipeline2D;
+	std::unique_ptr<GraphicsPipeline3D> m_GraphicsPipeline3D;
 
 	void initVulkan() 
 	{
@@ -77,11 +82,15 @@ private:
 		
 		// week 03
 		//m_MachineShader.Initialize(device);
-		m_RenderPass2D = std::make_unique<RenderPass>(device);
+		m_RenderPass = std::make_unique<RenderPass>(device);
+		//m_RenderPass3D = std::make_unique<RenderPass>(device);
 		//createRenderPass();
 
-		m_BasicGraphicsPipeline2D = std::make_unique<BasicGraphicsPipeline2D>(device, m_RenderPass2D->GetHandle(), "shaders/shader2D.vert.spv",
+		m_BasicGraphicsPipeline2D = std::make_unique<BasicGraphicsPipeline2D>(device, m_RenderPass->GetHandle(), "shaders/shader2D.vert.spv",
 			"shaders/shader2D.frag.spv");
+
+		m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(device, physicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
+			"shaders/shader3D.frag.spv");
 
 		createFrameBuffers();
 
@@ -94,28 +103,59 @@ private:
 
 		m_Scene2D = std::make_unique<Scene2D>(device, physicalDevice, m_CommandPool.GetHandle());
 
-		m_Scene2D->AddTriangle(
-			{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} },
-			{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} },
-			{ {0.0f, 0.5f}, {0.0f, 0.0f, 1.0f} });
+		//m_Scene2D->AddTriangle(
+		//	{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} },
+		//	{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} },
+		//	{ {0.0f, 0.5f}, {0.0f, 0.0f, 1.0f} });
+
+		//m_Scene2D->AddTriangle(
+		//	{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} },
+		//	{ {-0.4f, -0.6f}, {0.0f, 1.0f, 1.0f} },
+		//	{ {-0.70f, 0.0f}, {1.0f, 0.0f, 1.0f} });
 
 		m_Scene2D->AddTriangle(
-			{ {-1.f, -0.6f}, {1.0f, 1.0f, 0.0f} },
-			{ {-0.4f, -0.6f}, {0.0f, 1.0f, 1.0f} },
-			{ {-0.70f, 0.0f}, {1.0f, 0.0f, 1.0f} });
+			{ {1.f, 0.6f}, {1.0f, 0.0f, 0.0f} },
+			{ {0.5f, 0.6f}, {0.0f, 1.0f, 0.0f} },
+			{ {0.75f, 0.0f}, {0.0f, 0.0f, 1.0f} });
 
-		m_Scene2D->AddTriangle(
-			{ {1.f, 0.6f}, {1.0f, 1.0f, 0.0f} },
-			{ {0.5f, 0.6f}, {0.0f, 1.0f, 1.0f} },
-			{ {0.75f, 0.0f}, {1.0f, 0.0f, 1.0f} });
+		//m_Scene2D->AddOval({ 0.f,0.f }, 0.3f, 0.3f, 50, { 0.f, 0.5f, 1.f });
 
-		m_Scene2D->AddOval({ 0.f,0.f }, 0.3f, 0.3f, 50, { 0.f, 0.5f, 1.f });
+		//m_Scene2D->AddRectangle
+		//({ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} },
+		//	{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} },
+		//	{ {0.5f, 0.5f}, {0.0f, 0.0f, 1.0f} },
+		//	{ {-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f} });
 
-		m_Scene2D->AddRectangle
-		({ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} },
-			{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} },
-			{ {0.5f, 0.5f}, {0.0f, 0.0f, 1.0f} },
-			{ {-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f} });
+		m_Scene3D = std::make_unique<Scene>(device, physicalDevice, m_CommandPool.GetHandle());
+		m_Scene3D->AddTriangle(
+			{ {-1.f, -1.f, 1.f}, {1.0f, 0.0f, 0.0f} },
+			{ {1.f, -1.0f, 1.f}, {0.0f, 1.0f, 0.0f} },
+			{ {0.0f, 1.f, 1.f}, {0.0f, 0.0f, 1.0f} });
+
+		m_Scene3D->AddTriangle(
+			{ {-0.5f, -0.5f, 2.f}, {0.0f, 1.0f, 0.0f} },
+			{ {0.5f, -0.5f, 2.f}, {1.0f, 0.0f, 0.0f} },
+			{ {0.0f, 0.5f, 2.f}, {0.0f, 0.0f, 1.0f} });
+
+		m_Scene3D->AddTriangle(
+			{ {-0.5f, -0.5f, 3.f}, {0.0f, 1.0f, 0.0f} },
+			{ {0.5f, -0.5f, 3.f}, {1.0f, 0.0f, 0.0f} },
+			{ {0.0f, 0.5f, 3.f}, {0.0f, 0.0f, 1.0f} });
+
+		m_Scene3D->AddTriangle(
+			{ {-0.5f, -0.5f, 4.f}, {0.0f, 1.0f, 0.0f} },
+			{ {0.5f, -0.5f, 4.f}, {1.0f, 0.0f, 0.0f} },
+			{ {0.0f, 0.5f, 4.f}, {0.0f, 0.0f, 1.0f} });
+
+		m_Scene3D->AddTriangle(
+			{ {-0.5f, -0.5f, 5.f}, {0.0f, 1.0f, 0.0f} },
+			{ {0.5f, -0.5f, 5.f}, {1.0f, 0.0f, 0.0f} },
+			{ {0.0f, 0.5f, 5.f}, {0.0f, 0.0f, 1.0f} });
+
+		m_Scene3D->AddTriangle(
+			{ {-0.5f, -0.5f, 6.f}, {0.0f, 1.0f, 0.0f} },
+			{ {0.5f, -0.5f, 6.f}, {1.0f, 0.0f, 0.0f} },
+			{ {0.0f, 0.5f, 6.f}, {0.0f, 0.0f, 1.0f} });
 	}
 
 	void mainLoop()
@@ -129,7 +169,7 @@ private:
 		vkDeviceWaitIdle(device);
 	}
 
-	void cleanup() 
+	void cleanup()
 	{
 		vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
@@ -137,14 +177,17 @@ private:
 
 		m_CommandPool.Destroy();
 		
-		for (auto framebuffer : swapChainFramebuffers) {
+		for (auto framebuffer : swapChainFramebuffers)
+		{
 			vkDestroyFramebuffer(device, framebuffer, nullptr);
 		}
 
 
 		m_BasicGraphicsPipeline2D->DestroyPipeline(device);
+		m_GraphicsPipeline3D->DestroyPipeline(device);
 
-		m_RenderPass2D->Destroy(device);
+		m_RenderPass->Destroy(device);
+		//m_RenderPass3D->Destroy(device);
 
 		if (enableValidationLayers) {
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
@@ -152,6 +195,8 @@ private:
 		SwapchainManager::GetInstance().Cleanup();
 	
 		m_Scene2D->CleanUp();
+		m_Scene3D->CleanUp();
+		
 
 		vkDestroyDevice(device, nullptr);
 

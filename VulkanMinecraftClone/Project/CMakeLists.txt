@@ -47,7 +47,7 @@ set(SOURCES
 	"Scene2D.h" "Scene2D.cpp"  
 	"RenderPass.h" 
 	"GraphicsPipeline.h"
-	"BasicGraphicsPipeline2D.h")
+	"BasicGraphicsPipeline2D.h" "GraphicsPipeline3D.h")
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "Mesh.h" "Mesh.cpp")

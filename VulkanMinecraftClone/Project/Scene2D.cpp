@@ -14,9 +14,7 @@ Scene2D::Scene2D(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool
 }
 
 Scene2D::~Scene2D()
-{
-
-}
+{}
 
 void Scene2D::Render(VkCommandBuffer buffer) const
 {
