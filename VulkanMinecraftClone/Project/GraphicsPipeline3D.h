@@ -7,13 +7,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <chrono>
+#include <Camera.h>
+#include "Mesh.h"
 
 struct UniformBufferObject
 {
-	alignas(16) glm::mat4 model;
-	glm::mat4 view;
+	alignas(16)	glm::mat4 view;
 	glm::mat4 proj;
 };
+
+class Camera;
 
 class GraphicsPipeline3D final : public GraphicsPipeline
 {
@@ -45,6 +48,7 @@ public:
 		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 		rasterizer.depthClampEnable = VK_FALSE;
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
+		//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;  // TODO: make this toggleable
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
 		//rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
@@ -92,7 +96,14 @@ public:
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 1;
 		pipelineLayoutInfo.pSetLayouts = &m_DescriptorSetLayout;
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
+		//pipelineLayoutInfo.pushConstantRangeCount = 0;
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+		VkPushConstantRange pushConstantRange = {};
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(MeshData);
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+
 		pipelineLayoutInfo.flags = 0;
 
 		if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
@@ -156,47 +167,25 @@ public:
 
 	void UpdateUniformBuffer(VkDevice device, uint32_t currentImage)
 	{
-		static auto startTime = std::chrono::high_resolution_clock::now();
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
 		UniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 20.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		// Update view matrix using camera's view matrix
+		ubo.view = Camera::GetInstance().GetViewMatrix();
 
-		ubo.proj = glm::perspective(glm::radians(30.0f), SwapchainManager::GetInstance().GetSwapchainExtent().width / (float)SwapchainManager::GetInstance().GetSwapchainExtent().height, 0.01f, 10000.0f);
+		// Update projection matrix using camera's projection matrix
+		//ubo.proj = Camera::GetInstance().projectionMatrix;
+		glm::mat4 projection = glm::mat4(1.f);
+		projection = glm::perspective(
+			glm::radians(Camera::GetInstance().m_Zoom),
+			static_cast<float>(WIDTH) / HEIGHT,
+			0.1f,
+			200.f);
+		ubo.proj = projection;
+		// Ensure correct aspect ratio
+		ubo.proj[1][1] *= -1;		
 
-		ubo.proj[1][1] *= -1;
-
+		// Copy data to uniform buffer
 		memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
-
-		//static auto startTime = std::chrono::high_resolution_clock::now();
-		//auto currentTime = std::chrono::high_resolution_clock::now();
-		//float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-		//// Static rotation angle in radians
-		//constexpr float rotationAngle = glm::radians(0.0f);
-
-		//// Model matrix: Rotate around the z-axis with the static angle
-		//glm::mat4 model = glm::rotate(glm::mat4(1.0f), rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-
-		//// View matrix: Set camera position and orientation
-		//glm::mat4 view = glm::lookAt(glm::vec3(1.f, 0.0f, 20.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		//// Projection matrix: Set perspective projection
-		//VkExtent2D swapchainExtent = SwapchainManager::GetInstance().GetSwapchainExtent();
-		//glm::mat4 proj = glm::perspective(glm::radians(30.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.01f, 10000.0f);
-		//proj[1][1] *= -1; // Flip the y-axis to match Vulkan's coordinate system
-
-		//// Combine matrices into UniformBufferObject
-		//UniformBufferObject ubo;
-		//ubo.model = model;
-		//ubo.view = view;
-		//ubo.proj = proj;
-
-		//memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 	}
 
 	void CreateDescriptorPool(VkDevice device)
@@ -252,7 +241,6 @@ public:
 
 			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 		}
-
 	}
 
 	void ConfigurePipeline() override
@@ -288,8 +276,6 @@ public:
 	{
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSets[imageIndex], 0, nullptr);
 	}
-
-
 
 private:
 	VkDescriptorSetLayout m_DescriptorSetLayout;

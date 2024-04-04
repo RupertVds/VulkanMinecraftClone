@@ -13,11 +13,11 @@ public:
 	Scene(Scene&& other) = delete;
 	Scene& operator=(Scene&& other) = delete;
 public:
-	void Render(VkCommandBuffer buffer) const;
+	void Render(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout) const;
 	void Update() const;
 
 	void AddCube();
-	void AddTriangle(const Vertex& v1, const Vertex& v2, const Vertex& v3);
+	void AddTriangle(const glm::vec3& translation, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 
 	void CleanUp();
 private:

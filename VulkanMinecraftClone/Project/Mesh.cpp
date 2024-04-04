@@ -19,7 +19,7 @@ void Mesh::Initialize(VkPhysicalDevice physicalDevice, VkDevice device, VkComman
     CreateIndexBuffer(device, physicalDevice, commandPool);
 }
 
-void Mesh::Draw(VkCommandBuffer buffer)
+void Mesh::Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout)
 {
     VkBuffer vertexBuffers[] = { m_VkVertexBuffer };
     VkDeviceSize vertexOffsets[] = { 0 };
@@ -28,7 +28,21 @@ void Mesh::Draw(VkCommandBuffer buffer)
     VkBuffer indexBuffers[] = { m_VkIndexBuffer };
     vkCmdBindIndexBuffer(buffer, m_VkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+    vkCmdPushConstants(
+        buffer,
+        pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
+        0, // Offset within the push constants to update
+        sizeof(MeshData), // size of the push constants to update
+        &m_MeshData
+    );
+
     vkCmdDrawIndexed(buffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
+}
+
+void Mesh::SetMeshData(const MeshData& meshData)
+{
+    m_MeshData = meshData;
 }
 
 

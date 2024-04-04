@@ -11,6 +11,7 @@ void VulkanBase::initWindow()
 void VulkanBase::drawFrame(uint32_t imageIndex) 
 {
 	VkExtent2D swapChainExtent = SwapchainManager::GetInstance().GetSwapchainExtent();
+	//vkCmdSetPolygonModeEXT(m_CommandBuffer.GetVkCommandBuffer(), VK_POLYGON_MODE_LINE);
 
 	VkViewport viewport{};
 	viewport.x = 0.0f;
@@ -35,7 +36,7 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 	m_GraphicsPipeline3D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 	m_GraphicsPipeline3D->BindDescriptorSets(m_CommandBuffer.GetVkCommandBuffer(), imageIndex);
 
-	m_Scene3D->Render(m_CommandBuffer.GetVkCommandBuffer());
+	m_Scene3D->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
 
 	m_RenderPass->End(m_CommandBuffer);
 }

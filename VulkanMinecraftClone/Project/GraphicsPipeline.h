@@ -21,6 +21,8 @@ public:
 
     // Methods for rendering
     virtual void BindPipeline(VkCommandBuffer commandBuffer) = 0;
+
+    VkPipelineLayout GetPipelineLayout() { return m_PipelineLayout; }
 protected:
     VkPipelineLayout m_PipelineLayout;
     VkPipeline m_GraphicsPipeline;

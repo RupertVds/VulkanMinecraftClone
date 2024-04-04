@@ -5,6 +5,11 @@
 #include <array>
 #include <memory>
 
+struct MeshData
+{
+	glm::mat4 model{1.f};
+};
+
 struct Vertex
 {
 	glm::vec3 position;
@@ -53,7 +58,8 @@ public:
 	~Mesh() = default;
 
 	void DestroyMesh(VkDevice device);
-	void Draw(VkCommandBuffer buffer);
+	void Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout);
+	void SetMeshData(const MeshData& meshData);
 private:
 	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool);
 	void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
@@ -65,4 +71,6 @@ private:
 	VkDeviceMemory m_VkIndexBufferMemory;
 	std::vector<Vertex> m_Vertices;
 	std::vector<uint16_t> m_Indices;
+
+	MeshData m_MeshData{};
 };
