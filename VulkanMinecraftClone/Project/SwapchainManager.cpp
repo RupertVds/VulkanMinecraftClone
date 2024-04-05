@@ -22,6 +22,12 @@ void SwapchainManager::Cleanup()
     }
 
     vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+
+
+	for (auto framebuffer : m_SwapChainFramebuffers)
+	{
+		vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
+	}
 }
 
 SwapChainSupportDetails SwapchainManager::QuerySwapChainSupport(VkPhysicalDevice device)
@@ -75,10 +81,10 @@ VkPresentModeKHR SwapchainManager::ChooseSwapPresentMode(const std::vector<VkPre
 	}
 
 	// with vsync:
-	return VK_PRESENT_MODE_FIFO_KHR;
+return VK_PRESENT_MODE_FIFO_KHR;
 
 	// without vsync
-	//return VK_PRESENT_MODE_IMMEDIATE_KHR;
+	return VK_PRESENT_MODE_IMMEDIATE_KHR;
 }
 
 VkExtent2D SwapchainManager::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
@@ -187,6 +193,30 @@ void SwapchainManager::CreateImageViews()
 
 		if (vkCreateImageView(m_Device, &createInfo, nullptr, &m_SwapChainImageViews[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image views!");
+		}
+	}
+}
+
+void SwapchainManager::CreateFrameBuffers(VkRenderPass renderPass)
+{
+	auto& swapChainImageViews = SwapchainManager::GetInstance().GetImageViews();
+	m_SwapChainFramebuffers.resize(swapChainImageViews.size());
+	for (size_t i = 0; i < swapChainImageViews.size(); i++)
+	{
+		VkImageView attachments[] = { swapChainImageViews[i] };
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = SwapchainManager::GetInstance().GetSwapchainExtent().width;
+		framebufferInfo.height = SwapchainManager::GetInstance().GetSwapchainExtent().height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(m_Device, &framebufferInfo, nullptr, &m_SwapChainFramebuffers[i]) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
 }

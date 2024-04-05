@@ -84,11 +84,11 @@ void Camera::Update(float deltaTime)
 
     ProcessMouseScroll(static_cast<float>(m_InputManager->GetScrollOffset().second));
     
-    std::cout << "pos x:" << m_Position.x;
-    std::cout << ", pos y:" << m_Position.y;
-    std::cout << ", pos z:" << m_Position.z << '\n';
-    std::cout << "pitch:" << m_Pitch;
-    std::cout << ", yaw:" << m_Yaw << '\n';
+    //std::cout << "pos x:" << m_Position.x;
+    //std::cout << ", pos y:" << m_Position.y;
+    //std::cout << ", pos z:" << m_Position.z << '\n';
+    //std::cout << "pitch:" << m_Pitch;
+    //std::cout << ", yaw:" << m_Yaw << '\n';
 }
 
 glm::mat4 Camera::GetViewMatrix()

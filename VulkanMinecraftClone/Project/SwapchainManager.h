@@ -30,7 +30,8 @@ public:
     VkExtent2D GetSwapchainExtent() const { return m_SwapChainExtent; }
     VkFormat GetSwapchainImageFormat() const { return m_SwapChainImageFormat; }
     const std::vector<VkImageView>& GetImageViews() const { return m_SwapChainImageViews; }
-
+    void CreateFrameBuffers(VkRenderPass renderPass);
+    const std::vector<VkFramebuffer>& GetSwapchainFrameBuffers() const { return m_SwapChainFramebuffers; }
 private:
     SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
     SwapchainManager() = default;
@@ -41,7 +42,9 @@ private:
     VkFormat m_SwapChainImageFormat{};
     std::vector<VkImage> m_SwapChainImages{};
     std::vector<VkImageView> m_SwapChainImageViews{};
+    std::vector<VkFramebuffer> m_SwapChainFramebuffers;
 
+    // TODO: remove these
     VkInstance m_Instance = VK_NULL_HANDLE;
     VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
     VkDevice m_Device = VK_NULL_HANDLE;
@@ -53,4 +56,5 @@ private:
     VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void CreateSwapChain();
     void CreateImageViews();
+
 };

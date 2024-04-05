@@ -35,4 +35,7 @@ void CopyBuffer(VkDevice device, VkCommandPool commandPool, VkBuffer srcBuffer, 
 
 void CreateDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout& descSetLayout);
 
-void CreateDescriptorPool();
+//void CreateDepthResources() 
+//{
+//
+//}
