@@ -28,6 +28,7 @@
 #include <Timer.h>
 #include "Camera.h"
 #include "InputManager.h"
+#include <Game.h>
 
 const std::vector<const char*> validationLayers = 
 {
@@ -59,11 +60,12 @@ private:
 
 	std::unique_ptr<RenderPass> m_RenderPass;
 
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 
 	// GAME?
-	std::unique_ptr<Scene2D> m_Scene2D{};
-	std::unique_ptr<Scene> m_Scene3D{};
+	//std::unique_ptr<Scene2D> m_Scene2D{};
+	//std::unique_ptr<Scene> m_Scene3D{};
+	std::unique_ptr<Game> m_pGame;
 	std::unique_ptr<BasicGraphicsPipeline2D> m_BasicGraphicsPipeline2D;
 	std::unique_ptr<GraphicsPipeline3D> m_GraphicsPipeline3D;
 
@@ -71,7 +73,7 @@ private:
 	void initWindow();
 	void mainLoop();
 	void drawFrame(uint32_t imageIndex);	
-	void drawFrame();
+	void Render();
 	void cleanup();
 	void createSurface();
 
@@ -83,7 +85,7 @@ private:
 	// Main initialization
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debugMessenger;
-	VkDevice device = VK_NULL_HANDLE;
+	VkDevice m_Device = VK_NULL_HANDLE;
 	VkSurfaceKHR surface;
 
 	VkSemaphore imageAvailableSemaphore;

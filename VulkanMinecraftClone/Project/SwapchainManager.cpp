@@ -81,10 +81,10 @@ VkPresentModeKHR SwapchainManager::ChooseSwapPresentMode(const std::vector<VkPre
 	}
 
 	// with vsync:
-return VK_PRESENT_MODE_FIFO_KHR;
+	return VK_PRESENT_MODE_FIFO_KHR;
 
 	// without vsync
-	return VK_PRESENT_MODE_IMMEDIATE_KHR;
+	//return VK_PRESENT_MODE_IMMEDIATE_KHR;
 }
 
 VkExtent2D SwapchainManager::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)

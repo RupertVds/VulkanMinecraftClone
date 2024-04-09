@@ -21,105 +21,27 @@ void VulkanBase::initVulkan()
 
 
 	// week 04 
-	SwapchainManager::GetInstance().Initialize(instance, physicalDevice, device, surface, window);
+	SwapchainManager::GetInstance().Initialize(instance, m_PhysicalDevice, m_Device, surface, window);
 
 	// week 03
-	m_RenderPass = std::make_unique<RenderPass>(device);
+	m_RenderPass = std::make_unique<RenderPass>(m_Device);
 	//m_RenderPass3D = std::make_unique<RenderPass>(device);
 
-	m_BasicGraphicsPipeline2D = std::make_unique<BasicGraphicsPipeline2D>(device, m_RenderPass->GetHandle(), "shaders/shader2D.vert.spv",
+	m_BasicGraphicsPipeline2D = std::make_unique<BasicGraphicsPipeline2D>(m_Device, m_RenderPass->GetHandle(), "shaders/shader2D.vert.spv",
 		"shaders/shader2D.frag.spv");
 
-	m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(device, physicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
+	m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
 		"shaders/shader3D.frag.spv");
 
 	//createFrameBuffers();
 	SwapchainManager::GetInstance().CreateFrameBuffers(m_RenderPass->GetHandle());
 
 	// week 02
-	m_CommandPool.Initialize(device, QueueManager::GetInstance().FindQueueFamilies(physicalDevice, surface));
+	m_CommandPool.Initialize(m_Device, QueueManager::GetInstance().FindQueueFamilies(m_PhysicalDevice, surface));
 	m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
 
 	// week 06
 	createSyncObjects();
-
-	m_Scene2D = std::make_unique<Scene2D>(device, physicalDevice, m_CommandPool.GetHandle());
-
-	m_Scene2D->AddTriangle(
-		{ {-0.95f, 0.9f}, {1.0f, 0.0f, 0.0f} },
-		{ {-0.9f, 0.80f}, {0.0f, 1.0f, 0.0f} },
-		{ {-0.85f, 0.9f}, {0.0f, 0.0f, 1.0f} });
-
-	m_Scene2D->AddTriangle(
-		{ {-0.80f, 0.9f}, {1.0f, 0.0f, 1.0f} },
-		{ {-0.75f, 0.80f}, {1.0f, 1.0f, 0.0f} },
-		{ {-0.70f, 0.9f}, {0.0f, 1.0f, 1.0f} });
-
-	m_Scene2D->AddOval({ -0.90f, 0.7f }, 0.05f, 0.05f, 50, { 0.25f, 1.f, 0.25f });
-
-	m_Scene2D->AddRectangle(
-		{ {-0.80f, 0.65f}, {1.0f, 0.0f, 0.0f} },
-		{ {-0.70f, 0.65f}, {0.0f, 1.0f, 0.0f} },
-		{ {-0.70f, 0.75f}, {0.0f, 0.0f, 1.0f} },
-		{ {-0.80f, 0.75f}, {1.0f, 1.0f, 1.0f} });
-
-	m_Scene3D = std::make_unique<Scene>(device, physicalDevice, m_CommandPool.GetHandle());
-	// Define the vertices for the cube
-	std::vector<Vertex> vertices = {
-		// Front face
-		{{-1.0f, -1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},   // 0: Bottom-left
-		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},    // 1: Bottom-right
-		{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},     // 2: Top-right
-		{{-1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}},    // 3: Top-left
-
-		// Back face
-		{{-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 1.0f}},  // 4: Bottom-left
-		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 1.0f}},   // 5: Bottom-right
-		{{1.0f, 1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}},    // 6: Top-right
-		{{-1.0f, 1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}},   // 7: Top-left
-	};
-
-	// Define the indices for the cube
-	std::vector<uint16_t> indices = {
-		// Front face
-		0, 1, 2,  // Triangle 1
-		2, 3, 0,  // Triangle 2
-
-		// Right face
-		1, 5, 6,  // Triangle 1
-		6, 2, 1,  // Triangle 2
-
-		// Back face
-		7, 6, 5,  // Triangle 1
-		5, 4, 7,  // Triangle 2
-
-		// Left face
-		4, 0, 3,  // Triangle 1
-		3, 7, 4,  // Triangle 2
-
-		// Top face
-		3, 2, 6,  // Triangle 1
-		6, 7, 3,  // Triangle 2
-
-		// Bottom face
-		4, 5, 1,  // Triangle 1
-		1, 0, 4   // Triangle 2
-	};
-
-	// Add the cube to the scene
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[0], vertices[1], vertices[2]); // Front face
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[0], vertices[2], vertices[3]);
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[1], vertices[5], vertices[6]); // Right face
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[1], vertices[6], vertices[2]);
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[7], vertices[6], vertices[5]); // Back face
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[7], vertices[5], vertices[4]);
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[4], vertices[0], vertices[3]); // Left face
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[4], vertices[3], vertices[7]);
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[3], vertices[2], vertices[6]); // Top face
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[3], vertices[6], vertices[7]);
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[4], vertices[1], vertices[0]); // Bottom face
-	m_Scene3D->AddTriangle({ 0, 0, 0 }, vertices[4], vertices[5], vertices[1]);
-
 }
 
 void VulkanBase::mainLoop()
@@ -127,33 +49,20 @@ void VulkanBase::mainLoop()
 	float printTimer = 0.f;
 	Timer::GetInstance().Start();
 	InputManager::GetInstance().Init(window);
-	Camera::GetInstance().Init(&InputManager::GetInstance(), { 0, 0, 5 });
+	
+	m_pGame = std::make_unique<Game>();
+	m_pGame->Init(m_Device, m_PhysicalDevice, m_CommandPool.GetHandle());
 
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
-		Timer::GetInstance().Update();
-		printTimer += Timer::GetInstance().GetElapsed();
-		if (printTimer >= 1.f)
-		{
-			printTimer = 0.f;
-			std::cout << "dFPS: " << Timer::GetInstance().GetdFPS() << std::endl;
-		}
-		Camera::GetInstance().Update(Timer::GetInstance().GetElapsed());
-		if (InputManager::GetInstance().IsKeyPressed(GLFW_KEY_C))
-		{
-			InputManager::GetInstance().ToggleFPSMode();
-		}
 
-		if (InputManager::GetInstance().IsKeyPressed(GLFW_KEY_ESCAPE))
-		{
-			glfwSetWindowShouldClose(window, true);
-		}
+		if (InputManager::GetInstance().IsKeyPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, true);
 
-		// week 06
-		drawFrame();
+		m_pGame->Update();
+		Render();
 	}
-	vkDeviceWaitIdle(device);
+	vkDeviceWaitIdle(m_Device);
 	Timer::GetInstance().Stop();
 }
 
@@ -180,27 +89,28 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 
 	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 
-	m_Scene2D->Render(m_CommandBuffer.GetVkCommandBuffer());
+	//m_Scene2D->Render(m_CommandBuffer.GetVkCommandBuffer());
+	m_pGame->Render2D(m_CommandBuffer.GetVkCommandBuffer());
 
+	m_GraphicsPipeline3D->UpdateUniformBuffer(m_Device, imageIndex);
 	m_GraphicsPipeline3D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 	m_GraphicsPipeline3D->BindDescriptorSets(m_CommandBuffer.GetVkCommandBuffer(), imageIndex);
 
-	m_Scene3D->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
+	//m_Scene3D->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
+	m_pGame->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
 
 	m_RenderPass->End(m_CommandBuffer);
 }
 
-void VulkanBase::drawFrame()
+void VulkanBase::Render()
 {
 	// multithreading and surface setup (imageIndex).
-	vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-	vkResetFences(device, 1, &inFlightFence);
+	vkWaitForFences(m_Device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	vkResetFences(m_Device, 1, &inFlightFence);
 
 	uint32_t imageIndex;
 	auto swapChain = SwapchainManager::GetInstance().GetSwapchain();
-	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
-
-	m_GraphicsPipeline3D->UpdateUniformBuffer(device, imageIndex);
+	vkAcquireNextImageKHR(m_Device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
 	// Combine this to record buffer?
 	m_CommandBuffer.Reset();
@@ -245,25 +155,26 @@ void VulkanBase::drawFrame()
 
 void VulkanBase::cleanup()
 {
-	vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
-	vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
-	vkDestroyFence(device, inFlightFence, nullptr);
+	vkDestroySemaphore(m_Device, renderFinishedSemaphore, nullptr);
+	vkDestroySemaphore(m_Device, imageAvailableSemaphore, nullptr);
+	vkDestroyFence(m_Device, inFlightFence, nullptr);
 
 	m_CommandPool.Destroy();
 
-	m_BasicGraphicsPipeline2D->DestroyPipeline(device);
-	m_GraphicsPipeline3D->DestroyPipeline(device);
-	m_Scene2D->CleanUp();
-	m_Scene3D->CleanUp();
+	m_BasicGraphicsPipeline2D->DestroyPipeline(m_Device);
+	m_GraphicsPipeline3D->DestroyPipeline(m_Device);
+	//m_Scene2D->CleanUp();
+	//m_Scene3D->CleanUp();
+	m_pGame->Destroy();
 
-	m_RenderPass->Destroy(device);
+	m_RenderPass->Destroy(m_Device);
 
 	if (enableValidationLayers) {
 		DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 	}
 	SwapchainManager::GetInstance().Cleanup();
 
-	vkDestroyDevice(device, nullptr);
+	vkDestroyDevice(m_Device, nullptr);
 
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
@@ -297,12 +208,12 @@ void VulkanBase::pickPhysicalDevice() {
 
 	for (const auto& device : devices) {
 		if (isDeviceSuitable(device)) {
-			physicalDevice = device;
+			m_PhysicalDevice = device;
 			break;
 		}
 	}
 
-	if (physicalDevice == VK_NULL_HANDLE) {
+	if (m_PhysicalDevice == VK_NULL_HANDLE) {
 		throw std::runtime_error("failed to find a suitable GPU!");
 	}
 }
@@ -316,7 +227,7 @@ bool VulkanBase::isDeviceSuitable(VkPhysicalDevice device) {
 }
 
 void VulkanBase::createLogicalDevice() {
-	QueueFamilyIndices indices = QueueManager::GetInstance().FindQueueFamilies(physicalDevice, surface);
+	QueueFamilyIndices indices = QueueManager::GetInstance().FindQueueFamilies(m_PhysicalDevice, surface);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
@@ -357,11 +268,11 @@ void VulkanBase::createLogicalDevice() {
 		createInfo.enabledLayerCount = 0;
 	}
 
-	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+	if (vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create logical device!");
 	}
 
-	QueueManager::GetInstance().Initialize(device, physicalDevice, surface);
+	QueueManager::GetInstance().Initialize(m_Device, m_PhysicalDevice, surface);
 }
 
 bool checkValidationLayerSupport()
@@ -465,9 +376,9 @@ void VulkanBase::createSyncObjects()
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-	if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-		vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
-		vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
+	if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+		vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
+		vkCreateFence(m_Device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create synchronization objects for a frame!");
 	}
 

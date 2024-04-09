@@ -6,8 +6,8 @@ void InputManager::Init(GLFWwindow* window)
 
     int tempX, tempY{};
     glfwGetWindowSize(window, &tempX, &tempY);
-    lastX = tempX / 2;
-    lastY = tempY / 2;
+    lastX = tempX / 2.f;
+    lastY = tempY / 2.f;
     firstMouse = true;
 
     m_IsFPS = false;
