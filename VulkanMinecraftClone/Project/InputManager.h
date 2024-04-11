@@ -37,14 +37,15 @@ public:
     void SetFPSMode(bool state);
     void ToggleFPSMode();
 
-    float lastX;
-    float lastY;
-    bool firstMouse;
-    bool m_IsFPS;
+    float lastX{};
+    float lastY{};
+    bool firstMouse{};
+    bool m_IsFPS{};
+ 
 private:
     InputManager() = default;
 
-    GLFWwindow* m_Window;
+    GLFWwindow* m_Window{};
 
     double m_MouseX{};
     double m_MouseY{};

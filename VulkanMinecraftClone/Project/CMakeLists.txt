@@ -56,7 +56,7 @@ set(SOURCES
 	"Timer.h" "Timer.cpp" 
 	"InputManager.h" "InputManager.cpp" 
 	"Game.h" "Game.cpp" 
-	"Texture.h" "vendor/stb_image.h" "Texture.cpp")
+	"Texture.h" "vendor/stb_image.h" "Texture.cpp" )
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "Mesh.h" "Mesh.cpp")

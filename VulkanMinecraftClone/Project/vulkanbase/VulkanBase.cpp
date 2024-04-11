@@ -19,9 +19,9 @@ void VulkanBase::initVulkan()
 
 	SwapchainManager::GetInstance().Initialize(instance, m_PhysicalDevice, m_Device, surface, window);
 
-	m_RenderPass = std::make_unique<RenderPass>(m_Device);
+	m_RenderPass = std::make_unique<RenderPass>(m_Device, m_PhysicalDevice);
 
-
+	SwapchainManager::GetInstance().CreateDepthResources();
 	SwapchainManager::GetInstance().CreateFrameBuffers(m_RenderPass->GetHandle());
 
 	m_CommandPool.Initialize(m_Device, QueueManager::GetInstance().FindQueueFamilies(m_PhysicalDevice, surface));
@@ -76,6 +76,7 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 	scissor.extent = swapChainExtent;
 	vkCmdSetScissor(m_CommandBuffer.GetVkCommandBuffer(), 0, 1, &scissor);
 
+	// 3D
 	m_RenderPass->Begin(m_CommandBuffer, SwapchainManager::GetInstance().GetSwapchainFrameBuffers(), imageIndex);
 
 	m_GraphicsPipeline3D->UpdateUniformBuffer(m_Device, imageIndex);
@@ -84,6 +85,8 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 
 	m_pGame->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
 
+
+	// 2D
 	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 
 	m_pGame->Render2D(m_CommandBuffer.GetVkCommandBuffer());
@@ -152,8 +155,7 @@ void VulkanBase::cleanup()
 
 	m_BasicGraphicsPipeline2D->DestroyPipeline(m_Device);
 	m_GraphicsPipeline3D->DestroyPipeline(m_Device);
-	//m_Scene2D->CleanUp();
-	//m_Scene3D->CleanUp();
+
 	m_pGame->Destroy(m_Device);
 
 	m_RenderPass->Destroy(m_Device);

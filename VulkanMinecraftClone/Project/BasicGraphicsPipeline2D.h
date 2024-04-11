@@ -61,12 +61,18 @@ public:
 		dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
 		dynamicState.pDynamicStates = dynamicStates.data();
 
+		VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+		depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencilInfo.depthTestEnable = VK_FALSE; // Disable depth testing
+		depthStencilInfo.depthWriteEnable = VK_FALSE; // Disable depth writing
+		depthStencilInfo.depthCompareOp = VK_COMPARE_OP_ALWAYS; // Specify a comparison operation that always passes
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 0;
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 		pipelineLayoutInfo.flags = 0;
-
+		
 		if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create pipeline layout!");
 		}
@@ -92,6 +98,7 @@ public:
 		pipelineInfo.pMultisampleState = &multisampling;
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = &dynamicState;
+		pipelineInfo.pDepthStencilState = &depthStencilInfo;
 		pipelineInfo.layout = m_PipelineLayout;
 		pipelineInfo.renderPass = renderPass;
 		pipelineInfo.subpass = 0;

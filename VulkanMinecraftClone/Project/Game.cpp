@@ -14,13 +14,24 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
 
-	m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::Up);
-	m_pScene3D->AddFace({ 0,0.1f,0 }, Scene::Direction::Up);
+	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::Up);
+	//m_pScene3D->AddFace({ 0,0.1f,0 }, Scene::Direction::Up);
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::Down);
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::North);
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::East);
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::West);
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::South);
+
+	for (int x{}; x < 3; ++x)
+	{
+		for (int y{}; y < 10; ++y)
+		{
+			for (int z{}; z < 3; ++z)
+			{
+				m_pScene3D->AddCube({ x,y,z });
+			}
+		}
+	}
 
 	//m_pScene3D->AddCube({ 0,1,0 });
 	//m_pScene3D->AddCube({ 0,2,0 });

@@ -40,3 +40,6 @@ void CreateDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout& descSetLa
 
 void transitionImageLayout(VkDevice device, VkCommandPool commandPool, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 void copyBufferToImage(VkDevice device, VkCommandPool commandPool, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+VkFormat findSupportedFormat(VkDevice device, VkPhysicalDevice physicalDevice, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+bool hasStencilComponent(VkFormat format);
+VkFormat FindDepthFormat(VkDevice device, VkPhysicalDevice physicalDevice);

@@ -21,7 +21,12 @@ layout(push_constant)uniform PushConstants
 
 void main() 
 {
-    gl_Position = ubo.proj * ubo.view * mesh.model * vec4(inPosition, 1.0);
+    // Construct translation matrix
+    mat4 translationMatrix = mat4(1.0); // Identity matrix
+    //translationMatrix[3].xyz = mesh.translation; // Set translation part
+    translationMatrix[3].xyz = mesh.model[3].xyz; // Set translation part
+
+    gl_Position = ubo.proj * ubo.view * translationMatrix  * vec4(inPosition, 1.0);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 }

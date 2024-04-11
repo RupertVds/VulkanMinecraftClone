@@ -55,9 +55,10 @@ public:
 		//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;  // TODO: make this toggleable
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
-		//rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.cullMode = VK_CULL_MODE_NONE;
-		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+		//rasterizer.cullMode = VK_CULL_MODE_NONE;
+		//rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 
 		rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -85,16 +86,23 @@ public:
 			VK_DYNAMIC_STATE_VIEWPORT,
 			VK_DYNAMIC_STATE_SCISSOR
 		};
+
 		VkPipelineDynamicStateCreateInfo dynamicState{};
 		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
 		dynamicState.pDynamicStates = dynamicStates.data();
 
-		//VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-		//pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		//pipelineLayoutInfo.setLayoutCount = 0;
-		//pipelineLayoutInfo.pushConstantRangeCount = 0;
-		//pipelineLayoutInfo.flags = 0;
+		VkPipelineDepthStencilStateCreateInfo depthStencil{};
+		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencil.depthTestEnable = VK_TRUE;
+		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencil.depthBoundsTestEnable = VK_FALSE;
+		depthStencil.minDepthBounds = 0.0f; // Optional
+		depthStencil.maxDepthBounds = 1.0f; // Optional
+		depthStencil.stencilTestEnable = VK_FALSE;
+		depthStencil.front = {}; // Optional
+		depthStencil.back = {}; // Optional
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -135,6 +143,7 @@ public:
 		pipelineInfo.pMultisampleState = &multisampling;
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = &dynamicState;
+		pipelineInfo.pDepthStencilState = &depthStencil;
 		pipelineInfo.layout = m_PipelineLayout;
 		pipelineInfo.renderPass = renderPass;
 		pipelineInfo.subpass = 0;
@@ -268,7 +277,7 @@ public:
 				// Update descriptor write with image info
 				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				descriptorWrite.dstSet = m_DescriptorSets[i];
-				descriptorWrite.dstBinding = j + 1;  // Assuming the first binding is used for the uniform buffer
+				descriptorWrite.dstBinding = static_cast<uint32_t>(j + 1);  // Assuming the first binding is used for the uniform buffer
 				descriptorWrite.dstArrayElement = 0;
 				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 				descriptorWrite.descriptorCount = 1;

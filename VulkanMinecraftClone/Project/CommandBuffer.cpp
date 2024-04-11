@@ -1,4 +1,5 @@
 #include "CommandBuffer.h"
+#include <array>
 
 CommandBuffer::CommandBuffer()
 	:
