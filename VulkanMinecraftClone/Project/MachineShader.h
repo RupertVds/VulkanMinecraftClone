@@ -79,7 +79,7 @@ public:
 		auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
 		vertexInputInfo->vertexBindingDescriptionCount = 1;
-		vertexInputInfo->vertexAttributeDescriptionCount = static_cast<uint32_t>(2);
+		vertexInputInfo->vertexAttributeDescriptionCount = static_cast<uint32_t>(3);
 		vertexInputInfo->pVertexBindingDescriptions = bindingDescription.release();
 		vertexInputInfo->pVertexAttributeDescriptions = attributeDescriptions.release();
 		vertexInputInfo->flags = 0;

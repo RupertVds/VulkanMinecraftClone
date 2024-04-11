@@ -22,6 +22,7 @@ find_package(Vulkan REQUIRED)
 
 # Include Directories
 include_directories(${Vulkan_INCLUDE_DIRS})
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image.h)
 
 add_subdirectory(Project)
 

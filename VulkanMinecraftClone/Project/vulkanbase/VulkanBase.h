@@ -62,9 +62,6 @@ private:
 
 	VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 
-	// GAME?
-	//std::unique_ptr<Scene2D> m_Scene2D{};
-	//std::unique_ptr<Scene> m_Scene3D{};
 	std::unique_ptr<Game> m_pGame;
 	std::unique_ptr<BasicGraphicsPipeline2D> m_BasicGraphicsPipeline2D;
 	std::unique_ptr<GraphicsPipeline3D> m_GraphicsPipeline3D;

@@ -45,10 +45,10 @@ void Scene::AddFace(const glm::vec3& position, Direction direction)
     case Direction::Up:
         // Vertices for the face oriented upwards
         vertices = {
-            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},  // Top-left
-            {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},   // Top-right
-            {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},    // Bottom-right
-            {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}    // Bottom-left
+            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},  // Top-left
+            {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},   // Top-right
+            {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},    // Bottom-right
+            {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}    // Bottom-left
         };
         indices = { 0, 1, 2, 2, 3, 0 }; // Indices for the face
         break;
@@ -56,10 +56,10 @@ void Scene::AddFace(const glm::vec3& position, Direction direction)
     case Direction::Down:
         // Vertices for the face oriented downwards
         vertices = {
-            {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},   // Top-left
-            {{0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},    // Top-right
-            {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},  // Bottom-right
-            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}  // Bottom-left
+            {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},   // Top-left
+            {{0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},    // Top-right
+            {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},  // Bottom-right
+            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}  // Bottom-left
         };
         indices = { 0, 1, 2, 2, 3, 0 }; // Indices for the face
         break;
@@ -67,10 +67,10 @@ void Scene::AddFace(const glm::vec3& position, Direction direction)
     case Direction::North:
         // Vertices for the face oriented towards the north
         vertices = {
-            {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},    // Top-left
-            {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},     // Top-right
-            {{0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},    // Bottom-right
-            {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}    // Bottom-left
+            {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},    // Top-left
+            {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},     // Top-right
+            {{0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},    // Bottom-right
+            {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}    // Bottom-left
         };
         indices = { 0, 1, 2, 2, 3, 0 }; // Indices for the face
         break;
@@ -78,10 +78,10 @@ void Scene::AddFace(const glm::vec3& position, Direction direction)
     case Direction::South:
         // Vertices for the face oriented towards the south
         vertices = {
-            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},  // Top-left
-            {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},   // Top-right
-            {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},    // Bottom-right
-            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}    // Bottom-left
+            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},  // Top-left
+            {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},   // Top-right
+            {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},    // Bottom-right
+            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}    // Bottom-left
         };
         indices = { 0, 1, 2, 2, 3, 0 }; // Indices for the face
         break;
@@ -89,10 +89,10 @@ void Scene::AddFace(const glm::vec3& position, Direction direction)
     case Direction::East:
         // Vertices for the face oriented towards the east
         vertices = {
-            {{0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},    // Top-left
-            {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},     // Top-right
-            {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},    // Bottom-right
-            {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}    // Bottom-left
+            {{0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},    // Top-left
+            {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},     // Top-right
+            {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},    // Bottom-right
+            {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}    // Bottom-left
         };
         indices = { 0, 1, 2, 2, 3, 0 }; // Indices for the face
         break;
@@ -100,10 +100,10 @@ void Scene::AddFace(const glm::vec3& position, Direction direction)
     case Direction::West:
         // Vertices for the face oriented towards the west
         vertices = {
-            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},  // Top-left
-            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},   // Top-right
-            {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},    // Bottom-right
-            {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}    // Bottom-left
+            {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},  // Top-left
+            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},   // Top-right
+            {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},    // Bottom-right
+            {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}    // Bottom-left
         };
         indices = { 0, 1, 2, 2, 3, 0 }; // Indices for the face
         break;

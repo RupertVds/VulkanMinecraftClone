@@ -9,6 +9,7 @@
 #include <chrono>
 #include <Camera.h>
 #include "Mesh.h"
+#include "Texture.h"
 
 struct UniformBufferObject
 {
@@ -17,20 +18,23 @@ struct UniformBufferObject
 };
 
 class Camera;
+class Texture;
 
 class GraphicsPipeline3D final : public GraphicsPipeline
 {
 public:
 	GraphicsPipeline3D(VkDevice device, VkPhysicalDevice physicalDevice, VkRenderPass renderPass, const std::string& vertexShaderFile,
-		const std::string& fragmentShaderFile)
+		const std::string& fragmentShaderFile, const std::vector<Texture>& textures)
 		:
 		GraphicsPipeline{ vertexShaderFile , fragmentShaderFile },
-		m_DescriptorSetLayout{ VK_NULL_HANDLE }
+		m_DescriptorSetLayout{ VK_NULL_HANDLE },
+		m_pTextures{textures}
 	{
 		m_Shaders.Initialize(device);
 
 		CreateDescriptorSetLayout(device, m_DescriptorSetLayout);
 		CreateUniformBuffers(device, physicalDevice);
+
 		CreateDescriptorPool(device);
 		CreateDescriptorSets(device);
 
@@ -190,14 +194,26 @@ public:
 
 	void CreateDescriptorPool(VkDevice device)
 	{
-		VkDescriptorPoolSize poolSize{};
-		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		//VkDescriptorPoolSize poolSize{};
+		//poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		//poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+		//VkDescriptorPoolCreateInfo poolInfo{};
+		//poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		//poolInfo.poolSizeCount = 1;
+		//poolInfo.pPoolSizes = &poolSize;
+		//poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+		std::array<VkDescriptorPoolSize, 2> poolSizes{};
+		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+		poolInfo.pPoolSizes = poolSizes.data();
 		poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
 		if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
@@ -240,6 +256,29 @@ public:
 			descriptorWrite.pTexelBufferView = nullptr; // Optional
 
 			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+
+			// Iterate over each texture and sampler
+			for (size_t j = 0; j < m_pTextures.size(); j++)
+			{
+				VkDescriptorImageInfo imageInfo{};
+				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				imageInfo.imageView = m_pTextures[j].GetImageView();  // Assuming Texture class has a method to get ImageView
+				imageInfo.sampler = m_pTextures[j].GetSampler();
+
+				// Update descriptor write with image info
+				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite.dstSet = m_DescriptorSets[i];
+				descriptorWrite.dstBinding = j + 1;  // Assuming the first binding is used for the uniform buffer
+				descriptorWrite.dstArrayElement = 0;
+				descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				descriptorWrite.descriptorCount = 1;
+				descriptorWrite.pBufferInfo = nullptr;
+				descriptorWrite.pImageInfo = &imageInfo;
+				descriptorWrite.pTexelBufferView = nullptr;
+
+				// Update descriptor sets
+				vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+			}
 		}
 	}
 
@@ -287,5 +326,5 @@ private:
 
 	VkDescriptorPool m_DescriptorPool;
 	std::vector<VkDescriptorSet> m_DescriptorSets;
-
+	std::vector<Texture> m_pTextures;
 };

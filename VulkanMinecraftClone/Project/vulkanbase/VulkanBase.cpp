@@ -10,37 +10,32 @@ void VulkanBase::initWindow()
 
 void VulkanBase::initVulkan()
 {
-	// week 06
 	createInstance();
 	setupDebugMessenger();
 	createSurface();
 
-	// week 05
 	pickPhysicalDevice();
 	createLogicalDevice();
 
-
-	// week 04 
 	SwapchainManager::GetInstance().Initialize(instance, m_PhysicalDevice, m_Device, surface, window);
 
-	// week 03
 	m_RenderPass = std::make_unique<RenderPass>(m_Device);
-	//m_RenderPass3D = std::make_unique<RenderPass>(device);
+
+
+	SwapchainManager::GetInstance().CreateFrameBuffers(m_RenderPass->GetHandle());
+
+	m_CommandPool.Initialize(m_Device, QueueManager::GetInstance().FindQueueFamilies(m_PhysicalDevice, surface));
+	m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
+
+	m_pGame = std::make_unique<Game>();
+	m_pGame->Init(m_Device, m_PhysicalDevice, m_CommandPool.GetHandle());
 
 	m_BasicGraphicsPipeline2D = std::make_unique<BasicGraphicsPipeline2D>(m_Device, m_RenderPass->GetHandle(), "shaders/shader2D.vert.spv",
 		"shaders/shader2D.frag.spv");
 
 	m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
-		"shaders/shader3D.frag.spv");
+		"shaders/shader3D.frag.spv", m_pGame->GetTextures());
 
-	//createFrameBuffers();
-	SwapchainManager::GetInstance().CreateFrameBuffers(m_RenderPass->GetHandle());
-
-	// week 02
-	m_CommandPool.Initialize(m_Device, QueueManager::GetInstance().FindQueueFamilies(m_PhysicalDevice, surface));
-	m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
-
-	// week 06
 	createSyncObjects();
 }
 
@@ -49,9 +44,6 @@ void VulkanBase::mainLoop()
 	float printTimer = 0.f;
 	Timer::GetInstance().Start();
 	InputManager::GetInstance().Init(window);
-	
-	m_pGame = std::make_unique<Game>();
-	m_pGame->Init(m_Device, m_PhysicalDevice, m_CommandPool.GetHandle());
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -84,20 +76,17 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 	scissor.extent = swapChainExtent;
 	vkCmdSetScissor(m_CommandBuffer.GetVkCommandBuffer(), 0, 1, &scissor);
 
-	//TODO: Change to Game->Render(VkCommandBuffer, uint32_t);
 	m_RenderPass->Begin(m_CommandBuffer, SwapchainManager::GetInstance().GetSwapchainFrameBuffers(), imageIndex);
-
-	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
-
-	//m_Scene2D->Render(m_CommandBuffer.GetVkCommandBuffer());
-	m_pGame->Render2D(m_CommandBuffer.GetVkCommandBuffer());
 
 	m_GraphicsPipeline3D->UpdateUniformBuffer(m_Device, imageIndex);
 	m_GraphicsPipeline3D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
 	m_GraphicsPipeline3D->BindDescriptorSets(m_CommandBuffer.GetVkCommandBuffer(), imageIndex);
 
-	//m_Scene3D->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
 	m_pGame->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
+
+	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
+
+	m_pGame->Render2D(m_CommandBuffer.GetVkCommandBuffer());
 
 	m_RenderPass->End(m_CommandBuffer);
 }
@@ -165,7 +154,7 @@ void VulkanBase::cleanup()
 	m_GraphicsPipeline3D->DestroyPipeline(m_Device);
 	//m_Scene2D->CleanUp();
 	//m_Scene3D->CleanUp();
-	m_pGame->Destroy();
+	m_pGame->Destroy(m_Device);
 
 	m_RenderPass->Destroy(m_Device);
 
@@ -222,8 +211,14 @@ bool VulkanBase::isDeviceSuitable(VkPhysicalDevice device) {
 	QueueFamilyIndices indices = QueueManager::GetInstance().FindQueueFamilies(device, surface);
 	bool extensionsSupported = checkDeviceExtensionSupport(device);
 
+	// Check for anisotropy filter support, we could change it to a conditional check inside the texture class
+	// and then do manually disable it
+	// samplerInfo.anisotropyEnable = VK_FALSE;
+	// samplerInfo.maxAnisotropy = 1.0f;
+	VkPhysicalDeviceFeatures supportedFeatures;
+	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-	return indices.isComplete() && extensionsSupported;
+	return indices.isComplete() && extensionsSupported && supportedFeatures.samplerAnisotropy;
 }
 
 void VulkanBase::createLogicalDevice() {
@@ -248,6 +243,7 @@ void VulkanBase::createLogicalDevice() {
 	queueCreateInfo.queueCount = 1;
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

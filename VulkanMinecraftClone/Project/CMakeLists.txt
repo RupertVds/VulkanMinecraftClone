@@ -2,6 +2,7 @@
 set(SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
 set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
 
+# Copy shaders
 file(GLOB_RECURSE GLSL_SOURCE_FILES
     "${SHADER_SOURCE_DIR}/*.frag"
     "${SHADER_SOURCE_DIR}/*.vert"
@@ -23,6 +24,8 @@ add_custom_target(
     DEPENDS ${SPIRV_BINARY_FILES}
 )
 
+# Copy textures
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 set(SOURCES
     "main.cpp"
@@ -47,7 +50,13 @@ set(SOURCES
 	"Scene2D.h" "Scene2D.cpp"  
 	"RenderPass.h" 
 	"GraphicsPipeline.h"
-	"BasicGraphicsPipeline2D.h" "GraphicsPipeline3D.h" "Camera.h" "Timer.h" "Timer.cpp" "Camera.cpp" "InputManager.h" "InputManager.cpp" "Game.h" "Game.cpp")
+	"BasicGraphicsPipeline2D.h" 
+	"GraphicsPipeline3D.h" 
+	"Camera.h" "Camera.cpp"
+	"Timer.h" "Timer.cpp" 
+	"InputManager.h" "InputManager.cpp" 
+	"Game.h" "Game.cpp" 
+	"Texture.h" "vendor/stb_image.h" "Texture.cpp")
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "Mesh.h" "Mesh.cpp")
