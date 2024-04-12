@@ -1,7 +1,7 @@
-#include "Mesh.h"
+#include "BlockMesh.h"
 #include <vulkanbase\VulkanUtil.h>
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices, VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool)
+BlockMesh::BlockMesh(const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices, VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool)
     :
     m_Vertices{ vertices },
     m_Indices{ indices },
@@ -13,13 +13,13 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint16_t>& ind
     Initialize(physicalDevice, device, commandPool);
 }
 
-void Mesh::Initialize(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool)
+void BlockMesh::Initialize(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool)
 {
     CreateVertexBuffer(device, physicalDevice, commandPool);
     CreateIndexBuffer(device, physicalDevice, commandPool);
 }
 
-void Mesh::Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout)
+void BlockMesh::Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout, const glm::vec3& translation) const
 {
     VkBuffer vertexBuffers[] = { m_VkVertexBuffer };
     VkDeviceSize vertexOffsets[] = { 0 };
@@ -28,25 +28,34 @@ void Mesh::Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout)
     VkBuffer indexBuffers[] = { m_VkIndexBuffer };
     vkCmdBindIndexBuffer(buffer, m_VkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+    //vkCmdPushConstants(
+    //    buffer,
+    //    pipelineLayout,
+    //    VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
+    //    0, // Offset within the push constants to update
+    //    sizeof(MeshData), // size of the push constants to update
+    //    &m_MeshData
+    //);
+
     vkCmdPushConstants(
         buffer,
         pipelineLayout,
         VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
         0, // Offset within the push constants to update
-        sizeof(MeshData), // size of the push constants to update
-        &m_MeshData
+        sizeof(glm::vec3), // size of the push constants to update
+        &translation
     );
 
     vkCmdDrawIndexed(buffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
 }
 
-void Mesh::SetMeshData(const MeshData& meshData)
-{
-    m_MeshData = meshData;
-}
+//void BlockMesh::SetMeshData(const MeshData& meshData)
+//{
+//    m_MeshData = meshData;
+//}
 
 
-void Mesh::CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+void BlockMesh::CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
 {
     VkDeviceSize bufferSize = sizeof(m_Vertices[0]) * m_Vertices.size();
 
@@ -79,7 +88,7 @@ void Mesh::CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, 
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
-void Mesh::CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+void BlockMesh::CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
 {
     VkDeviceSize bufferSize = sizeof(m_Indices[0]) * m_Indices.size();
 
@@ -112,7 +121,7 @@ void Mesh::CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, V
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
-void Mesh::DestroyMesh(VkDevice device)
+void BlockMesh::DestroyMesh(VkDevice device)
 {
     vkDestroyBuffer(device, m_VkVertexBuffer, nullptr);
     vkFreeMemory(device, m_VkVertexBufferMemory, nullptr);

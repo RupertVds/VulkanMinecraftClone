@@ -8,8 +8,9 @@
 
 #include <chrono>
 #include <Camera.h>
-#include "Mesh.h"
+#include "BlockMesh.h"
 #include "Texture.h"
+#include <BlockMeshGenerator.h>
 
 struct UniformBufferObject
 {
@@ -24,11 +25,10 @@ class GraphicsPipeline3D final : public GraphicsPipeline
 {
 public:
 	GraphicsPipeline3D(VkDevice device, VkPhysicalDevice physicalDevice, VkRenderPass renderPass, const std::string& vertexShaderFile,
-		const std::string& fragmentShaderFile, const std::vector<Texture>& textures)
+		const std::string& fragmentShaderFile)
 		:
 		GraphicsPipeline{ vertexShaderFile , fragmentShaderFile },
-		m_DescriptorSetLayout{ VK_NULL_HANDLE },
-		m_pTextures{textures}
+		m_DescriptorSetLayout{ VK_NULL_HANDLE }
 	{
 		m_Shaders.Initialize(device);
 
@@ -57,8 +57,8 @@ public:
 		rasterizer.lineWidth = 1.0f;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 		//rasterizer.cullMode = VK_CULL_MODE_NONE;
-		//rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		//rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 
 		rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -267,12 +267,33 @@ public:
 			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 
 			// Iterate over each texture and sampler
-			for (size_t j = 0; j < m_pTextures.size(); j++)
+			//for (size_t j = 0; j < m_pTextures.size(); j++)
+			//{
+			//	VkDescriptorImageInfo imageInfo{};
+			//	imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			//	imageInfo.imageView = m_pTextures[j].GetImageView();  // Assuming Texture class has a method to get ImageView
+			//	imageInfo.sampler = m_pTextures[j].GetSampler();
+
+			//	// Update descriptor write with image info
+			//	descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			//	descriptorWrite.dstSet = m_DescriptorSets[i];
+			//	descriptorWrite.dstBinding = static_cast<uint32_t>(j + 1);  // Assuming the first binding is used for the uniform buffer
+			//	descriptorWrite.dstArrayElement = 0;
+			//	descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			//	descriptorWrite.descriptorCount = 1;
+			//	descriptorWrite.pBufferInfo = nullptr;
+			//	descriptorWrite.pImageInfo = &imageInfo;
+			//	descriptorWrite.pTexelBufferView = nullptr;
+
+			//	// Update descriptor sets
+			//	vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+			//}
+			for (size_t j = 0; j < BlockMeshGenerator::GetInstance().GetTextures().size(); j++)
 			{
 				VkDescriptorImageInfo imageInfo{};
 				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-				imageInfo.imageView = m_pTextures[j].GetImageView();  // Assuming Texture class has a method to get ImageView
-				imageInfo.sampler = m_pTextures[j].GetSampler();
+				imageInfo.imageView = BlockMeshGenerator::GetInstance().GetTextures()[j].GetImageView();  // Assuming Texture class has a method to get ImageView
+				imageInfo.sampler = BlockMeshGenerator::GetInstance().GetTextures()[j].GetSampler();
 
 				// Update descriptor write with image info
 				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -335,5 +356,5 @@ private:
 
 	VkDescriptorPool m_DescriptorPool;
 	std::vector<VkDescriptorSet> m_DescriptorSets;
-	std::vector<Texture> m_pTextures;
+	//std::vector<Texture> m_pTextures;
 };

@@ -45,9 +45,9 @@ set(SOURCES
 	"CommandBuffer.h" "CommandBuffer.cpp" 
 	"QueueManager.h" "QueueManager.cpp" 
 	"SwapchainManager.h" "SwapchainManager.cpp" 
-	"Scene.h" "Scene.cpp" 
 	"vulkanbase/VulkanBase.cpp" 
 	"Scene2D.h" "Scene2D.cpp"  
+	"Scene.h" "Scene.cpp"
 	"RenderPass.h" 
 	"GraphicsPipeline.h"
 	"BasicGraphicsPipeline2D.h" 
@@ -56,10 +56,10 @@ set(SOURCES
 	"Timer.h" "Timer.cpp" 
 	"InputManager.h" "InputManager.cpp" 
 	"Game.h" "Game.cpp" 
-	"Texture.h" "vendor/stb_image.h" "Texture.cpp" )
+	"Texture.h" "vendor/stb_image.h" "Texture.cpp"  "Block.h"  "BlockMeshGenerator.h" "BlockMeshGenerator.cpp" "vendor/json.hpp")
 
 # Create the executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "Mesh.h" "Mesh.cpp")
+add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "BlockMesh.h" "BlockMesh.cpp")
 add_dependencies(${PROJECT_NAME} Shaders)
 # Link libraries
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

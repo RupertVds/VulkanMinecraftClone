@@ -27,14 +27,18 @@ void VulkanBase::initVulkan()
 	m_CommandPool.Initialize(m_Device, QueueManager::GetInstance().FindQueueFamilies(m_PhysicalDevice, surface));
 	m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
 
+	BlockMeshGenerator::GetInstance().Init(m_Device, m_PhysicalDevice, m_CommandPool.GetHandle());
+
 	m_pGame = std::make_unique<Game>();
 	m_pGame->Init(m_Device, m_PhysicalDevice, m_CommandPool.GetHandle());
 
 	m_BasicGraphicsPipeline2D = std::make_unique<BasicGraphicsPipeline2D>(m_Device, m_RenderPass->GetHandle(), "shaders/shader2D.vert.spv",
 		"shaders/shader2D.frag.spv");
 
+	//m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
+	//	"shaders/shader3D.frag.spv", m_pGame->GetTextures());	
 	m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
-		"shaders/shader3D.frag.spv", m_pGame->GetTextures());
+		"shaders/shader3D.frag.spv");
 
 	createSyncObjects();
 }
@@ -152,6 +156,8 @@ void VulkanBase::cleanup()
 	vkDestroyFence(m_Device, inFlightFence, nullptr);
 
 	m_CommandPool.Destroy();
+
+	BlockMeshGenerator::GetInstance().Destroy(m_Device);
 
 	m_BasicGraphicsPipeline2D->DestroyPipeline(m_Device);
 	m_GraphicsPipeline3D->DestroyPipeline(m_Device);

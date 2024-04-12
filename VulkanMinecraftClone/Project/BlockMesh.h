@@ -7,7 +7,8 @@
 
 struct MeshData
 {
-	glm::mat4 model{1.f};
+	//glm::mat4 model{1.f};
+	glm::vec3 position{};
 };
 
 struct Vertex
@@ -51,21 +52,22 @@ struct Vertex
 
 class CommandPool;
 
-class Mesh final
+class BlockMesh final
 {
 public:
-	Mesh(
+	BlockMesh() = default;
+	BlockMesh(
 		const std::vector<Vertex>& vertices,
 		const std::vector<uint16_t>& indices,
 		VkPhysicalDevice physicalDevice,
 		VkDevice device,
 		VkCommandPool commandPool
 	);
-	~Mesh() = default;
+	~BlockMesh() = default;
 
 	void DestroyMesh(VkDevice device);
-	void Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout);
-	void SetMeshData(const MeshData& meshData);
+	void Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout, const glm::vec3& translation) const;
+	//void SetMeshData(const MeshData& meshData);
 private:
 	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool);
 	void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
@@ -78,5 +80,5 @@ private:
 	std::vector<Vertex> m_Vertices;
 	std::vector<uint16_t> m_Indices;
 
-	MeshData m_MeshData{};
+	//MeshData m_MeshData{};
 };

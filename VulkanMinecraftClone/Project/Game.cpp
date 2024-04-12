@@ -8,11 +8,12 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 {
 	Camera::GetInstance().Init(&InputManager::GetInstance(), { 0, 0, 5 });
 
-	Texture textureAtlas{};
-	textureAtlas.Init(device, physicalDevice, commandPool);
-	m_pTextures.push_back(textureAtlas);
+	//Texture textureAtlas{};
+	//textureAtlas.Init(device, physicalDevice, commandPool);
+	//m_pTextures.push_back(textureAtlas);
 
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
+
 
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::Up);
 	//m_pScene3D->AddFace({ 0,0.1f,0 }, Scene::Direction::Up);
@@ -22,30 +23,17 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::West);
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::South);
 
-	for (int x{}; x < 3; ++x)
+	for (int x{}; x < 16; ++x)
 	{
-		for (int y{}; y < 10; ++y)
+		for (int y{}; y < 16; ++y)
 		{
-			for (int z{}; z < 3; ++z)
+			for (int z{}; z < 16; ++z)
 			{
-				m_pScene3D->AddCube({ x,y,z });
+				m_pScene3D->AddBlock({ { x,y,z }, BlockType::Dirt });
 			}
 		}
 	}
 
-	//m_pScene3D->AddCube({ 0,1,0 });
-	//m_pScene3D->AddCube({ 0,2,0 });
-	//m_pScene3D->AddCube({ 0,3,0 });
-	//m_pScene3D->AddCube({ 1,3,0 });
-	//m_pScene3D->AddCube({ 2,3,0 });
-	//m_pScene3D->AddCube({ 3,3,0 });
-	//m_pScene3D->AddCube({ 4,3,0 });
-	//m_pScene3D->AddCube({ 5,3,0 });
-	//m_pScene3D->AddCube({ 6,3,0 });
-	//m_pScene3D->AddCube({ 7,3,0 });
-	//m_pScene3D->AddCube({ 8,3,0 });
-	//m_pScene3D->AddCube({ 9,3,0 });
-	//m_pScene3D->AddCube({ 10,3,0 });
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);
 
@@ -106,8 +94,8 @@ void Game::Destroy(VkDevice device)
 	m_pScene2D->CleanUp();
 	m_pScene3D->CleanUp();
 	//m_pTextureAtlas->Destroy(device);
-	for (auto& texture : m_pTextures)
-	{
-		texture.Destroy(device);
-	}
+	//for (auto& texture : m_pTextures)
+	//{
+	//	texture.Destroy(device);
+	//}
 }
