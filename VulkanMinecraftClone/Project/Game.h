@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include <memory>
 #include "Texture.h"
+#include <Chunk.h>
 
 class Game final
 {
@@ -25,7 +26,7 @@ public:
 private:
 	std::unique_ptr<Scene2D> m_pScene2D{};
 	std::unique_ptr<Scene> m_pScene3D{};
-
+	std::unique_ptr<Chunk> m_Chunk{};
 	//std::vector<Texture> m_pTextures{};
 	float m_PrintTimer{};
 	const float m_PrintDelay{ 1.f };

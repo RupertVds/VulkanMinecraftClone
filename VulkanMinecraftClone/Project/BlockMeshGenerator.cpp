@@ -82,11 +82,7 @@ void BlockMeshGenerator::GenerateBlockMeshesFromAtlas(const std::string& jsonFil
             { {0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordLeft, texCoordTop} },     // Bottom-right
             { {0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordLeft, texCoordBottom} },  // Top-right
             { {-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordRight, texCoordBottom} },   // Top-left
-            //            // Back face vertices
-            //{ {-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordLeft, texCoordTop} },    // Bottom-left
-            //{ {0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordRight, texCoordTop} },     // Bottom-right
-            //{ {0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordRight, texCoordBottom} },  // Top-right
-            //{ {-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordLeft, texCoordBottom} },   // Top-left
+
             // Right face vertices
             { {0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordLeft, texCoordTop} },      // Bottom-left
             { {0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {texCoordRight, texCoordTop} },    // Bottom-right

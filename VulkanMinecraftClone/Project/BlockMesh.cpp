@@ -28,15 +28,6 @@ void BlockMesh::Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout, co
     VkBuffer indexBuffers[] = { m_VkIndexBuffer };
     vkCmdBindIndexBuffer(buffer, m_VkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-    //vkCmdPushConstants(
-    //    buffer,
-    //    pipelineLayout,
-    //    VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
-    //    0, // Offset within the push constants to update
-    //    sizeof(MeshData), // size of the push constants to update
-    //    &m_MeshData
-    //);
-
     vkCmdPushConstants(
         buffer,
         pipelineLayout,
@@ -48,12 +39,6 @@ void BlockMesh::Draw(VkCommandBuffer buffer, VkPipelineLayout pipelineLayout, co
 
     vkCmdDrawIndexed(buffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
 }
-
-//void BlockMesh::SetMeshData(const MeshData& meshData)
-//{
-//    m_MeshData = meshData;
-//}
-
 
 void BlockMesh::CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
 {

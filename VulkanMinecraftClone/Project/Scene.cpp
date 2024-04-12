@@ -36,8 +36,8 @@ void Scene::AddCube(const glm::vec3& position)
 
 }
 
-void Scene::AddFace(const glm::vec3& position, Direction direction)
-{
+//void Scene::AddFace(const glm::vec3& position, Direction direction)
+//{
     //// Define the vertices and indices for the face based on the position and direction
     //std::vector<Vertex> vertices;
     //std::vector<uint16_t> indices;
@@ -117,7 +117,7 @@ void Scene::AddFace(const glm::vec3& position, Direction direction)
     ////meshData.model = glm::translate(glm::mat4{ 1.f }, position); // Translate the identity matrix by the specified position
     //meshData.position = position;
     //m_Meshes.back()->SetMeshData(meshData);
-}
+//}
 
 void Scene::AddTriangle(const glm::vec3& translation, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {

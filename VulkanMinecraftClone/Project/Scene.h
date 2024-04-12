@@ -7,16 +7,6 @@
 class Scene final
 {
 public:
-	enum class Direction
-	{
-		Up,
-		Down,
-		North,
-		East,
-		South,
-		West
-	};
-public:
 	Scene(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
 	~Scene();
 	Scene(const Scene& other) = delete;
@@ -29,7 +19,7 @@ public:
 
 	void AddBlock(const BlockData& blockData);
 	void AddCube(const glm::vec3& position);
-	void AddFace(const glm::vec3& position, Direction direction);
+	//void AddFace(const glm::vec3& position, Direction direction);
 	void AddTriangle(const glm::vec3& translation, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 
 	void CleanUp();

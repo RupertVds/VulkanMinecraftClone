@@ -1,7 +1,7 @@
 {
   "blocks": [
     {
-      "id": "grass",
+      "id": "grassTop",
       "row": 0,
       "col": 0
     },
@@ -14,6 +14,31 @@
       "id": "dirt",
       "row": 0,
       "col": 2
+    },
+    {
+      "id": "grassSide",
+      "row": 0,
+      "col": 3
+    },
+    {
+      "id": "sand",
+      "row": 8,
+      "col": 14
+    },
+    {
+      "id": "logSide",
+      "row": 1,
+      "col": 4
+    },
+    {
+      "id": "logTop",
+      "row": 1,
+      "col": 5
+    },
+    {
+      "id": "leaves",
+      "row": 3,
+      "col": 4
     }
   ]
 }

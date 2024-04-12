@@ -113,7 +113,7 @@ public:
 		VkPushConstantRange pushConstantRange = {};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from
 		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(MeshData);
+		pushConstantRange.size = sizeof(glm::vec3);
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 		pipelineLayoutInfo.flags = 0;

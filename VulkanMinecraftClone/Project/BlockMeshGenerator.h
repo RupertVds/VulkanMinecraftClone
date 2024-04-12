@@ -3,19 +3,22 @@
 #include <string>
 #include <Texture.h>
 #include "BlockMesh.h"
+#include "Chunk.h"
 
-// IMPORTANT:
-// ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
-enum class BlockType : unsigned short
-{
-    Grass,
-    Stone,
-    Dirt,
-    Sand,
-    Water,
-    Log,
-    Leaves
-};
+//// IMPORTANT:
+//// ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
+//enum class BlockType : unsigned short
+//{
+//    GrassTop,
+//    Stone,
+//    Dirt,
+//    GrassSide,
+//    Sand,
+//    LogSide,
+//    LogTop,
+//    Leaves,
+//    Water,
+//};
 
 class BlockMesh;
 

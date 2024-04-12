@@ -13,34 +13,8 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 	//m_pTextures.push_back(textureAtlas);
 
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
-
-
-	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::Up);
-	//m_pScene3D->AddFace({ 0,0.1f,0 }, Scene::Direction::Up);
-	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::Down);
-	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::North);
-	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::East);
-	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::West);
-	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::South);
-
-	m_pScene3D->AddBlock({ { 0,0,0 }, BlockType::Grass });
-	//m_pScene3D->AddBlock({ { 0,0,-1 }, BlockType::Grass });
-	//m_pScene3D->AddBlock({ { 1,0,-1 }, BlockType::Grass });
-	//m_pScene3D->AddBlock({ { 1,0,0 }, BlockType::Grass });
-	//m_pScene3D->AddBlock({ { 2,0,0 }, BlockType::Dirt });
-	//m_pScene3D->AddBlock({ { 3,0,0 }, BlockType::Stone });
-
-
-	//for (int x{}; x < 16; ++x)
-	//{
-	//	for (int y{}; y < 16; ++y)
-	//	{
-	//		for (int z{}; z < 16; ++z)
-	//		{
-	//			m_pScene3D->AddBlock({ { x,y,z }, BlockType::Dirt });
-	//		}
-	//	}
-	//}
+	    
+	m_Chunk = std::make_unique<Chunk>(glm::vec3{ 0,0,0 }, 16, 10, 16, device, physicalDevice, commandPool);
 
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);
@@ -90,6 +64,7 @@ void Game::Update()
 void Game::Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
 	m_pScene3D->Render(commandBuffer, pipelineLayout);
+	m_Chunk->Render(commandBuffer, pipelineLayout);
 }
 
 void Game::Render2D(VkCommandBuffer commandBuffer)
@@ -101,6 +76,7 @@ void Game::Destroy(VkDevice device)
 {
 	m_pScene2D->CleanUp();
 	m_pScene3D->CleanUp();
+	m_Chunk->Destroy(device);
 	//m_pTextureAtlas->Destroy(device);
 	//for (auto& texture : m_pTextures)
 	//{
