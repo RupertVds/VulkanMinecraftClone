@@ -23,16 +23,24 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::West);
 	//m_pScene3D->AddFace({ 0,0,0 }, Scene::Direction::South);
 
-	for (int x{}; x < 16; ++x)
-	{
-		for (int y{}; y < 16; ++y)
-		{
-			for (int z{}; z < 16; ++z)
-			{
-				m_pScene3D->AddBlock({ { x,y,z }, BlockType::Dirt });
-			}
-		}
-	}
+	m_pScene3D->AddBlock({ { 0,0,0 }, BlockType::Grass });
+	//m_pScene3D->AddBlock({ { 0,0,-1 }, BlockType::Grass });
+	//m_pScene3D->AddBlock({ { 1,0,-1 }, BlockType::Grass });
+	//m_pScene3D->AddBlock({ { 1,0,0 }, BlockType::Grass });
+	//m_pScene3D->AddBlock({ { 2,0,0 }, BlockType::Dirt });
+	//m_pScene3D->AddBlock({ { 3,0,0 }, BlockType::Stone });
+
+
+	//for (int x{}; x < 16; ++x)
+	//{
+	//	for (int y{}; y < 16; ++y)
+	//	{
+	//		for (int z{}; z < 16; ++z)
+	//		{
+	//			m_pScene3D->AddBlock({ { x,y,z }, BlockType::Dirt });
+	//		}
+	//	}
+	//}
 
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);
