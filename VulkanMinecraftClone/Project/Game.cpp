@@ -9,8 +9,21 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 	Camera::GetInstance().Init(&InputManager::GetInstance(), { 0, 0, 5 });
 
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
-	    
-	m_Chunk = std::make_unique<Chunk>(glm::vec3{ 0,0,0 }, 16, 256, 16, device, physicalDevice, commandPool);
+	
+
+	for (int x{}; x < 4; ++x)
+	{
+		for (int z{}; z < 4; ++z)
+		{
+			m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ x*16 + x,0,z*16 + z }, 16, 32, 16, device, physicalDevice, commandPool));
+
+		}
+	}
+	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 0,0,0 }, 16, 256, 16, device, physicalDevice, commandPool));
+	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 16,0,0 }, 16, 256, 16, device, physicalDevice, commandPool));
+	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 32,0,0 }, 16, 256, 16, device, physicalDevice, commandPool));
+	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 0,0,16 }, 16, 256, 16, device, physicalDevice, commandPool));
+	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 0,0,32 }, 16, 256, 16, device, physicalDevice, commandPool));
 
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);
@@ -60,7 +73,11 @@ void Game::Update()
 void Game::Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
 	m_pScene3D->Render(commandBuffer, pipelineLayout);
-	m_Chunk->Render(commandBuffer, pipelineLayout);
+	//m_Chunk->Render(commandBuffer, pipelineLayout);
+	for (const auto& chunk : m_Chunks)
+	{
+		chunk->Render(commandBuffer, pipelineLayout);
+	}
 }
 
 void Game::Render2D(VkCommandBuffer commandBuffer)
@@ -72,7 +89,11 @@ void Game::Destroy(VkDevice device)
 {
 	m_pScene2D->CleanUp();
 	m_pScene3D->CleanUp();
-	m_Chunk->Destroy(device);
+	for (auto& chunk : m_Chunks)
+	{
+		chunk->Destroy(device);
+	}
+	//m_Chunk->Destroy(device);
 	//m_pTextureAtlas->Destroy(device);
 	//for (auto& texture : m_pTextures)
 	//{

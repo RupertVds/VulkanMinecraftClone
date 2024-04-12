@@ -267,27 +267,6 @@ public:
 			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 
 			// Iterate over each texture and sampler
-			//for (size_t j = 0; j < m_pTextures.size(); j++)
-			//{
-			//	VkDescriptorImageInfo imageInfo{};
-			//	imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			//	imageInfo.imageView = m_pTextures[j].GetImageView();  // Assuming Texture class has a method to get ImageView
-			//	imageInfo.sampler = m_pTextures[j].GetSampler();
-
-			//	// Update descriptor write with image info
-			//	descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			//	descriptorWrite.dstSet = m_DescriptorSets[i];
-			//	descriptorWrite.dstBinding = static_cast<uint32_t>(j + 1);  // Assuming the first binding is used for the uniform buffer
-			//	descriptorWrite.dstArrayElement = 0;
-			//	descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			//	descriptorWrite.descriptorCount = 1;
-			//	descriptorWrite.pBufferInfo = nullptr;
-			//	descriptorWrite.pImageInfo = &imageInfo;
-			//	descriptorWrite.pTexelBufferView = nullptr;
-
-			//	// Update descriptor sets
-			//	vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
-			//}
 			for (size_t j = 0; j < BlockMeshGenerator::GetInstance().GetTextures().size(); j++)
 			{
 				VkDescriptorImageInfo imageInfo{};
