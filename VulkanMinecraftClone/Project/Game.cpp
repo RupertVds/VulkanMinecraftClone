@@ -8,13 +8,9 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 {
 	Camera::GetInstance().Init(&InputManager::GetInstance(), { 0, 0, 5 });
 
-	//Texture textureAtlas{};
-	//textureAtlas.Init(device, physicalDevice, commandPool);
-	//m_pTextures.push_back(textureAtlas);
-
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
 	    
-	m_Chunk = std::make_unique<Chunk>(glm::vec3{ 0,0,0 }, 16, 10, 16, device, physicalDevice, commandPool);
+	m_Chunk = std::make_unique<Chunk>(glm::vec3{ 0,0,0 }, 16, 256, 16, device, physicalDevice, commandPool);
 
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);

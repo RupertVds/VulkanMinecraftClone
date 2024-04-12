@@ -53,7 +53,6 @@ public:
         m_Width(width), m_Height(height), m_Depth(depth)
     {
         m_Blocks.resize(m_Width * m_Height * m_Depth, BlockType::Air);
-
         LoadBlockData("textures/blockdata.json");
         GenerateMesh();
         // Create Vulkan buffers
@@ -93,11 +92,12 @@ public:
         m_Vertices.clear();
         m_Indices.clear();
 
+
         for (int x = 0; x < m_Width; ++x) {
             for (int y = 0; y < m_Height; ++y) {
                 for (int z = 0; z < m_Depth; ++z) {
-                    //BlockType blockType = GetBlock({ x, y, z });
-                    BlockType blockType;
+                    BlockType blockType = GetBlock({ x, y, z });
+                    //BlockType blockType = BlockType::Air;
 
                     // Fill the chunk with grass on top
                     if (y == m_Height - 1) {
@@ -147,7 +147,7 @@ public:
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
         // Bind index buffer
-        vkCmdBindIndexBuffer(commandBuffer, m_VkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(commandBuffer, m_VkIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
         // Draw indexed
         vkCmdPushConstants(
@@ -159,6 +159,9 @@ public:
             &m_Position
         );
 
+        // Draw triangles directly from the vertex buffer
+        //vkCmdDraw(commandBuffer, static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
+
         vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
     }
 
@@ -169,7 +172,7 @@ private:
     int m_Depth;
     std::vector<BlockType> m_Blocks;
     std::vector<Vertex> m_Vertices;
-    std::vector<uint16_t> m_Indices;
+    std::vector<uint32_t> m_Indices;
     VkDevice m_Device;
     VkBuffer m_VkVertexBuffer;
     VkDeviceMemory m_VkVertexBufferMemory;
