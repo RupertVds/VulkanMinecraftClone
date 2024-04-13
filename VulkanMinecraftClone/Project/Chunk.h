@@ -100,12 +100,12 @@ public:
                     //BlockType blockType = BlockType::Air;
 
                     // Fill the chunk with grass on top
-                    if (y == m_Height - 1) {
-                        blockType = BlockType::GrassTop;
+                    if (y >= m_Height - 10) {
+                        blockType = BlockType::Water;
                     }
                     // Fill the chunk with dirt below the grass
                     else if (y >= m_Height / 2) {
-                        blockType = BlockType::Dirt;
+                        blockType = BlockType::Leaves;
                     }
                     // Fill the rest of the chunk with stone
                     else {
@@ -345,6 +345,7 @@ private:
             std::cout << "ERROR: BLOCK DATA NOT FOUND FOR THE GIVEN BLOCK TYPE!\n";
             return;
         }
+
 
         const BlockData& blockData = it->second;
 

@@ -39,6 +39,11 @@
       "id": "leaves",
       "row": 3,
       "col": 4
+    },
+    {
+      "id": "water",
+      "row": 12,
+      "col": 13
     }
   ]
 }
