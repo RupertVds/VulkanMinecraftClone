@@ -15,7 +15,7 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 	{
 		for (int z{}; z < 4; ++z)
 		{
-			m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ x*16 + x,0,z*16 + z }, 16, 64, 16, device, physicalDevice, commandPool));
+			m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ x*16 + x,0,z*16 + z }, 16, 128, 16, device, physicalDevice, commandPool));
 
 		}
 	}

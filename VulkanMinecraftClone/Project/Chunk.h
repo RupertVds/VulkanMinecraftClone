@@ -14,34 +14,41 @@
 // ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
 enum class BlockType : unsigned short
 {
-    GrassTop,
+    GrassBlock,
     Stone,
     Dirt,
-    GrassSide,
-    Sand,
-    LogSide,
-    LogTop,
-    Leaves,
-    Water,
+    //Sand,
+    //Log,
+    //Leaves,
+    //Water,
     Air
+};
+
+// MUST BE SORTED ALFABETICALLY
+// BECAUSE THE JSON READER RETURNS IT ALFABETICALLY
+enum class Direction : unsigned short
+{
+    Down,
+    East,
+    North,
+    South,
+    Up,
+    West
+};
+
+struct TextureCoords
+{
+    unsigned short row;
+    unsigned short column;
 };
 
 struct BlockData
 {
     std::string id;
-    int row;
-    int column;
+    std::unordered_map<Direction, TextureCoords> textures;
 };
 
-enum class Direction : unsigned short
-{
-    Up,
-    Down,
-    North,
-    East,
-    South,
-    West
-};
+
 
 
 class Chunk
@@ -92,6 +99,7 @@ public:
         m_Vertices.clear();
         m_Indices.clear();
 
+        //SetBlock({ 0,1,0 }, BlockType::GrassBlock);
 
         for (int x = 0; x < m_Width; ++x) {
             for (int y = 0; y < m_Height; ++y) {
@@ -100,18 +108,17 @@ public:
                     //BlockType blockType = BlockType::Air;
 
                     // Fill the chunk with grass on top
-                    if (y >= m_Height - 10) {
-                        blockType = BlockType::Water;
+                    if (y >= m_Height - 50) {
+                        blockType = BlockType::GrassBlock;
                     }
                     // Fill the chunk with dirt below the grass
                     else if (y >= m_Height / 2) {
-                        blockType = BlockType::Leaves;
+                        blockType = BlockType::Dirt;
                     }
                     // Fill the rest of the chunk with stone
                     else {
                         blockType = BlockType::Stone;
                     }
-
 
                     // Skip air blocks
                     if (blockType == BlockType::Air) {
@@ -189,11 +196,11 @@ private:
     };
 
     std::unordered_map<Direction, Offset> m_FaceOffsets{
-    {Direction::Up, {0, 1, 0}},
     {Direction::Down, {0, -1, 0}},
-    {Direction::North, {0, 0, -1}},
     {Direction::East, {1, 0, 0}},
+    {Direction::North, {0, 0, -1}},
     {Direction::South, {0, 0, 1}},
+    {Direction::Up, {0, 1, 0}},
     {Direction::West, {-1, 0, 0}}
     };
 private:
@@ -320,8 +327,13 @@ private:
             // Extract block data
             BlockData blockData;
             blockData.id = blocks[i]["id"];
-            blockData.row = blocks[i]["row"];
-            blockData.column = blocks[i]["col"];
+            auto texturesJson = blocks[i]["textures"];
+            int index = 0; // Counter for direction index
+            for (auto it = texturesJson.begin(); it != texturesJson.end(); ++it) {
+                Direction direction = static_cast<Direction>(index);
+                blockData.textures[direction] = { it.value()["row"], it.value()["col"] };
+                ++index; // Increment index for next direction
+            }
 
             // Add block data to the map
             m_BlockData[GetBlockType(i)] = blockData;
@@ -346,17 +358,24 @@ private:
             return;
         }
 
-
         const BlockData& blockData = it->second;
 
         constexpr float textureAtlasWidth = 16;
         constexpr float textureAtlasHeight = 16;
 
-        // Calculate texture coordinates based on block data
-        float texCoordLeft = blockData.column * (1.0f / textureAtlasWidth);
-        float texCoordRight = (blockData.column + 1) * (1.0f / textureAtlasWidth);
-        float texCoordTop = blockData.row * (1.0f / textureAtlasHeight);
-        float texCoordBottom = (blockData.row + 1) * (1.0f / textureAtlasHeight);
+        // Get texture coordinates for the current face
+        auto textureCoordsIt = blockData.textures.find(direction);
+        if (textureCoordsIt == blockData.textures.end()) {
+            std::cout << "ERROR: TEX COORDS NOT FOUND FOR THE CURRENT FACE DIRECTION!\n";
+            return;
+        }
+
+        auto textureCoords = textureCoordsIt->second;
+
+        float texCoordLeft = textureCoords.column * (1.0f / textureAtlasWidth);
+        float texCoordRight = (textureCoords.column + 1) * (1.0f / textureAtlasWidth);
+        float texCoordTop = textureCoords.row * (1.0f / textureAtlasHeight);
+        float texCoordBottom = (textureCoords.row + 1) * (1.0f / textureAtlasHeight);
 
         // Calculate the base position of the face
         glm::vec3 basePosition = position;
@@ -428,10 +447,10 @@ private:
             break;
 
         case Direction::North:
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
+            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
+            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
+            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
+            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
             break;
 
         case Direction::South:

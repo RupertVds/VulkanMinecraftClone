@@ -1,49 +1,91 @@
 {
   "blocks": [
     {
-      "id": "grassTop",
-      "row": 0,
-      "col": 0
+      "id": "grass",
+      "textures": {
+        "up": {
+          "row": 0,
+          "col": 0
+        },
+        "down": {
+          "row": 0,
+          "col": 2
+        },
+        "north": {
+          "row": 0,
+          "col": 3
+        },
+        "east": {
+          "row": 0,
+          "col": 3
+        },
+        "south": {
+          "row": 0,
+          "col": 3
+        },
+        "west": {
+          "row": 0,
+          "col": 3
+        }
+      }
     },
     {
       "id": "stone",
-      "row": 0,
-      "col": 1
+      "textures": {
+        "up": {
+          "row": 0,
+          "col": 1
+        },
+        "down": {
+          "row": 0,
+          "col": 1
+        },
+        "north": {
+          "row": 0,
+          "col": 1
+        },
+        "east": {
+          "row": 0,
+          "col": 1
+        },
+        "south": {
+          "row": 0,
+          "col": 1
+        },
+        "west": {
+          "row": 0,
+          "col": 1
+        }
+      }
     },
     {
       "id": "dirt",
-      "row": 0,
-      "col": 2
-    },
-    {
-      "id": "grassSide",
-      "row": 0,
-      "col": 3
-    },
-    {
-      "id": "sand",
-      "row": 8,
-      "col": 14
-    },
-    {
-      "id": "logSide",
-      "row": 1,
-      "col": 4
-    },
-    {
-      "id": "logTop",
-      "row": 1,
-      "col": 5
-    },
-    {
-      "id": "leaves",
-      "row": 3,
-      "col": 4
-    },
-    {
-      "id": "water",
-      "row": 12,
-      "col": 13
+      "textures": {
+        "up": {
+          "row": 0,
+          "col": 2
+        },
+        "down": {
+          "row": 0,
+          "col": 2
+        },
+        "north": {
+          "row": 0,
+          "col": 2
+        },
+        "east": {
+          "row": 0,
+          "col": 2
+        },
+        "south": {
+          "row": 0,
+          "col": 2
+        },
+        "west": {
+          "row": 0,
+          "col": 2
+        }
+      }
     }
   ]
 }
