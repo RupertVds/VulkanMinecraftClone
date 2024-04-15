@@ -86,6 +86,93 @@
           "col": 2
         }
       }
+    },
+    {
+      "id": "sand",
+      "textures": {
+        "up": {
+          "row": 11,
+          "col": 0
+        },
+        "down": {
+          "row": 11,
+          "col": 0
+        },
+        "north": {
+          "row": 11,
+          "col": 0
+        },
+        "east": {
+          "row": 11,
+          "col": 0
+        },
+        "south": {
+          "row": 11,
+          "col": 0
+        },
+        "west": {
+          "row": 11,
+          "col": 0
+        }
+      }
+    },
+    {
+      "id": "log",
+      "textures": {
+        "up": {
+          "row": 1,
+          "col": 5
+        },
+        "down": {
+          "row": 1,
+          "col": 5
+        },
+        "north": {
+          "row": 1,
+          "col": 4
+        },
+        "east": {
+          "row": 1,
+          "col": 4
+        },
+        "south": {
+          "row": 1,
+          "col": 4
+        },
+        "west": {
+          "row": 1,
+          "col": 4
+        }
+      }
+    },
+    {
+      "id": "leaves",
+      "textures": {
+        "up": {
+          "row": 3,
+          "col": 4
+        },
+        "down": {
+          "row": 3,
+          "col": 4
+        },
+        "north": {
+          "row": 3,
+          "col": 4
+        },
+        "east": {
+          "row": 3,
+          "col": 4
+        },
+        "south": {
+          "row": 3,
+          "col": 4
+        },
+        "west": {
+          "row": 3,
+          "col": 4
+        }
+      }
     }
   ]
 }

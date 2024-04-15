@@ -17,9 +17,9 @@ enum class BlockType : unsigned short
     GrassBlock,
     Stone,
     Dirt,
-    //Sand,
-    //Log,
-    //Leaves,
+    Sand,
+    Log,
+    Leaves,
     //Water,
     Air
 };
@@ -99,8 +99,6 @@ public:
         m_Vertices.clear();
         m_Indices.clear();
 
-        //SetBlock({ 0,1,0 }, BlockType::GrassBlock);
-
         for (int x = 0; x < m_Width; ++x) {
             for (int y = 0; y < m_Height; ++y) {
                 for (int z = 0; z < m_Depth; ++z) {
@@ -108,11 +106,11 @@ public:
                     //BlockType blockType = BlockType::Air;
 
                     // Fill the chunk with grass on top
-                    if (y >= m_Height - 50) {
+                    if (y >= m_Height - 1) {
                         blockType = BlockType::GrassBlock;
                     }
                     // Fill the chunk with dirt below the grass
-                    else if (y >= m_Height / 2) {
+                    else if (y >= m_Height - 4) {
                         blockType = BlockType::Dirt;
                     }
                     // Fill the rest of the chunk with stone
