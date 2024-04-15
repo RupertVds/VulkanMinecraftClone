@@ -11,19 +11,15 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
 	
 
-	for (int x{}; x < 3; ++x)
+	for (int x{}; x < 4; ++x)
 	{
-		for (int z{}; z < 3; ++z)
+		for (int z{}; z < 4; ++z)
 		{
-			m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ x*16 + x,0,z*16 + z}, 16, 32, 16, device, physicalDevice, commandPool));
+			m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ x*16 + x,0,z*16 + z}, 16, 64, 16, device, physicalDevice, commandPool));
 
 		}
 	}
-	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 0,0,0 }, 16, 256, 16, device, physicalDevice, commandPool));
-	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 16,0,0 }, 16, 256, 16, device, physicalDevice, commandPool));
-	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 32,0,0 }, 16, 256, 16, device, physicalDevice, commandPool));
-	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 0,0,16 }, 16, 256, 16, device, physicalDevice, commandPool));
-	//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ 0,0,32 }, 16, 256, 16, device, physicalDevice, commandP;
+
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);
 

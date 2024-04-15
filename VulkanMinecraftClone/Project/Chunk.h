@@ -20,7 +20,7 @@ enum class BlockType : unsigned short
     Sand,
     Log,
     Leaves,
-    //Water,
+    Water,
     Air
 };
 
@@ -99,41 +99,64 @@ public:
         m_Vertices.clear();
         m_Indices.clear();
 
+
+        // Fill the chunk with grass blocks
         for (int x = 0; x < m_Width; ++x) {
             for (int y = 0; y < m_Height; ++y) {
                 for (int z = 0; z < m_Depth; ++z) {
-                    BlockType blockType = GetBlock({ x, y, z });
-                    //BlockType blockType = BlockType::Air;
-
                     // Fill the chunk with grass on top
-                    if (y >= m_Height - 1) {
-                        blockType = BlockType::GrassBlock;
+                    if (y >= m_Height - 5) {
+                        SetBlock({x,y,z}, BlockType::Water);
                     }
                     // Fill the chunk with dirt below the grass
-                    else if (y >= m_Height - 4) {
-                        blockType = BlockType::Dirt;
+                    else if (y >= m_Height - 10) {
+                        SetBlock({ x,y,z }, BlockType::Sand);
                     }
                     // Fill the rest of the chunk with stone
                     else {
-                        blockType = BlockType::Stone;
+                        SetBlock({ x,y,z }, BlockType::Stone);
                     }
+                }
+            }
+        }
+
+        // Create the optimized mesh
+        for (int x = 0; x < m_Width; ++x)
+        {
+            for (int y = 0; y < m_Height; ++y)
+            {
+                for (int z = 0; z < m_Depth; ++z)
+                {
+                    BlockType blockType = GetBlock({ x, y, z });
 
                     // Skip air blocks
-                    if (blockType == BlockType::Air) {
+                    if (blockType == BlockType::Air)
+                    {
                         continue;
                     }
 
-                    // Check each face of the block
+                    // Add faces for opaque blocks
                     for (const auto& [direction, offset] : m_FaceOffsets)
                     {
                         int nx = x + offset.x;
                         int ny = y + offset.y;
                         int nz = z + offset.z;
 
-                        // If the adjacent block is air or out of bounds, add face vertices
-                        if (!IsOpaqueBlock(nx, ny, nz)) {
+                        if (blockType != BlockType::Leaves)
+                        {
+                            // Check if the neighboring block is the same type
+                            if (IsSameBlockType(blockType, nx, ny, nz))
+                            {
+                                // Skip adding faces if the neighboring block is the same type
+                                continue;
+                            }
+                        }
+
+                        if (!IsOpaqueBlock(nx, ny, nz))
+                        {
                             AddFaceVertices(blockType, direction, glm::vec3(x, y, z));
                         }
+                        // Add face vertices
                     }
                 }
             }
@@ -207,14 +230,41 @@ private:
         return static_cast<size_t>(x) + static_cast<size_t>(y) * m_Width + static_cast<size_t>(z) * m_Width * m_Height;
     }
 
-    // Check if a block at given position is opaque
+    bool IsSameBlockType(BlockType blockType, int x, int y, int z) const
+    {
+        // Check if the neighboring block is out of bounds
+        if (x < 0 || x >= m_Width || y < 0 || y >= m_Height || z < 0 || z >= m_Depth)
+        {
+            // Out of bounds blocks are not the same type
+            return false;
+        }
+
+        // Get the type of the neighboring block
+        BlockType neighborBlockType = GetBlock({ x, y, z });
+
+        // Check if the neighboring block is the same type as the current block
+        return (neighborBlockType == blockType);
+    }
+
     bool IsOpaqueBlock(int x, int y, int z) const {
         if (x < 0 || x >= m_Width || y < 0 || y >= m_Height || z < 0 || z >= m_Depth)
         {
             return false; // Out of bounds blocks are considered transparent
         }
-        return GetBlock({ x, y, z }) != BlockType::Air; // Check if the block is opaque
+
+        // Get the type of the current block
+        BlockType currentBlockType = GetBlock({ x, y, z });
+
+        // Check if the current block is translucent
+        if (currentBlockType == BlockType::Air || currentBlockType == BlockType::Leaves || currentBlockType == BlockType::Water)
+        {
+            return false; // Translucent blocks are considered transparent
+        }
+
+        // If none of the neighboring blocks are translucent, consider the current block as opaque
+        return true;
     }
+
 
     void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {

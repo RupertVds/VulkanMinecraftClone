@@ -173,6 +173,35 @@
           "col": 4
         }
       }
+    },
+    {
+      "id": "water",
+      "textures": {
+        "up": {
+          "row": 12,
+          "col": 13
+        },
+        "down": {
+          "row": 12,
+          "col": 13
+        },
+        "north": {
+          "row": 12,
+          "col": 13
+        },
+        "east": {
+          "row": 12,
+          "col": 13
+        },
+        "south": {
+          "row": 12,
+          "col": 13
+        },
+        "west": {
+          "row": 12,
+          "col": 13
+        }
+      }
     }
   ]
 }
