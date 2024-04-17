@@ -153,19 +153,28 @@ public:
         for (int x = 0; x < m_Width; ++x) {
             for (int y = 0; y < m_Height; ++y) {
                 for (int z = 0; z < m_Depth; ++z) {
-                    // Fill the chunk with grass on top
-                    //if (y >= m_Height - 5) {
-                    //    if(z >= m_Depth / 2)
-                    //    SetBlock({x,y,z}, BlockType::Leaves);
-                    //    else
-                    //        SetBlock({x,y,z}, BlockType::Water);
-                    //}
-                    if (y >= m_Height - 5) {
-                        SetBlock({ x,y,z }, BlockType::GrassBlock);
+                    // Fill the chunk on top
+                    if (y >= m_Height - 2) 
+                    {
+                        if(z >= m_Depth / 8)
+                            SetBlock({x,y,z}, BlockType::GrassBlock);
+                        if (z >= 2*m_Depth / 8)
+                            SetBlock({ x,y,z }, BlockType::Log);
+                        if (z >= 3*m_Depth / 8)
+                            SetBlock({ x,y,z }, BlockType::GrassBlock);
+                        if (z >= 4*m_Depth / 8)
+                            SetBlock({ x,y,z }, BlockType::Stone);
+                        if (z >= 5*m_Depth / 8)
+                            SetBlock({ x,y,z }, BlockType::Sand);
+                        if (z >= 6*m_Depth / 8)
+                            SetBlock({ x,y,z }, BlockType::Dirt);
+                        if (z >= 7 * m_Depth / 8)
+                            //SetBlock({ x,y,z }, BlockType::Water);
+                            SetBlock({ x,y,z }, BlockType::Log);
                     }
                     // Fill the chunk with dirt below the grass
-                    else if (y >= m_Height - 10) {
-                        SetBlock({ x,y,z }, BlockType::Sand);
+                    else if (y >= m_Height - 3) {
+                        SetBlock({ x,y,z }, BlockType::Dirt);
                     }
                     // Fill the rest of the chunk with stone
                     else {
