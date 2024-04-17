@@ -11,6 +11,8 @@ const float PITCH = 0.0f;
 const float SPEED = 5.f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
+const float MAX_MOVE_SPEED = 100.f;
+const float MIN_MOVE_SPEED = 1.f;
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices
 class Camera final

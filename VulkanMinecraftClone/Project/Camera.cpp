@@ -9,6 +9,7 @@ void Camera::Init(InputManager* inputManager, glm::vec3 position, glm::vec3 up, 
     m_Position = position;
     m_Front = glm::vec3{ 0.0f, 0.0f, -1.0f };
     m_MovementSpeed = SPEED;
+
     m_MouseSensitivity = SENSITIVITY;
     m_Zoom = ZOOM;
     m_WorldUp = up;
@@ -44,21 +45,21 @@ void Camera::Update(float deltaTime)
     {
         m_Position.y -= m_MovementSpeed * deltaTime;;
     }
-    if (m_InputManager->IsKeyPressed(GLFW_KEY_F))
+    if (m_InputManager->IsKeyHeld(GLFW_KEY_F))
     {
         m_MovementSpeed += 1.f;
-        if (m_MovementSpeed > 20.f)
-            m_MovementSpeed = 20.f;
-        if (m_MovementSpeed < 1.f)
-            m_MovementSpeed = 1.f;
+        if (m_MovementSpeed > MAX_MOVE_SPEED)
+            m_MovementSpeed = MAX_MOVE_SPEED;
+        if (m_MovementSpeed < MIN_MOVE_SPEED)
+            m_MovementSpeed = MIN_MOVE_SPEED;
     }
-    if (m_InputManager->IsKeyPressed(GLFW_KEY_G))
+    if (m_InputManager->IsKeyHeld(GLFW_KEY_G))
     {
         m_MovementSpeed -= 1.f;
-        if (m_MovementSpeed > 20.f)
-            m_MovementSpeed = 20.f;
-        if (m_MovementSpeed < 1.f)
-            m_MovementSpeed = 1.f;
+        if (m_MovementSpeed > MAX_MOVE_SPEED)
+            m_MovementSpeed = MAX_MOVE_SPEED;
+        if (m_MovementSpeed < MIN_MOVE_SPEED)
+            m_MovementSpeed = MIN_MOVE_SPEED;
     }
 
     float xpos = static_cast<float>(m_InputManager->GetMousePos().first);

@@ -26,7 +26,6 @@ public:
 private:
 	std::unique_ptr<Scene2D> m_pScene2D{};
 	std::unique_ptr<Scene> m_pScene3D{};
-	std::vector<std::unique_ptr<Chunk>> m_Chunks{};
 	//std::vector<Texture> m_pTextures{};
 	float m_PrintTimer{};
 	const float m_PrintDelay{ 1.f };

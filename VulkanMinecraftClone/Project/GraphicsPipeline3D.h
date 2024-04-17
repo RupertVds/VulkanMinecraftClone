@@ -122,7 +122,7 @@ public:
 		VkPushConstantRange pushConstantRange = {};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from
 		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(glm::vec3);
+		pushConstantRange.size = sizeof(glm::ivec3);
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 		pipelineLayoutInfo.flags = 0;
@@ -212,16 +212,6 @@ public:
 
 	void CreateDescriptorPool(VkDevice device)
 	{
-		//VkDescriptorPoolSize poolSize{};
-		//poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		//poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
-		//VkDescriptorPoolCreateInfo poolInfo{};
-		//poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		//poolInfo.poolSizeCount = 1;
-		//poolInfo.pPoolSizes = &poolSize;
-		//poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
 		std::array<VkDescriptorPoolSize, 2> poolSizes{};
 		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);

@@ -8,7 +8,7 @@
 // Json library used: https://github.com/nlohmann/json
 #include <vendor/json.hpp>
 #include <iostream>
-#include <BlockMesh.h>
+#include "BlockMesh.h"
 
 // IMPORTANT:
 // ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
@@ -48,24 +48,73 @@ struct BlockData
     std::unordered_map<Direction, TextureCoords> textures;
 };
 
-
-
+//struct Vertex
+//{
+//    glm::vec3 position;
+//    glm::vec3 normal;
+//    glm::vec2 texCoord;
+//
+//    static std::unique_ptr<VkVertexInputBindingDescription> getBindingDescription()
+//    {
+//        auto bindingDescription = std::make_unique<VkVertexInputBindingDescription>();
+//        bindingDescription->binding = 0;
+//        bindingDescription->stride = sizeof(Vertex);
+//        bindingDescription->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+//
+//        return bindingDescription; // std::move() ?
+//    }
+//
+//    static std::unique_ptr<VkVertexInputAttributeDescription[]> getAttributeDescriptions()
+//    {
+//        auto attributeDescriptions = std::make_unique<VkVertexInputAttributeDescription[]>(3);
+//
+//        attributeDescriptions[0].binding = 0;
+//        attributeDescriptions[0].location = 0;
+//        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+//        attributeDescriptions[0].offset = offsetof(Vertex, position);
+//
+//        attributeDescriptions[1].binding = 0;
+//        attributeDescriptions[1].location = 1;
+//        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+//        attributeDescriptions[1].offset = offsetof(Vertex, normal);
+//
+//        attributeDescriptions[2].binding = 0;
+//        attributeDescriptions[2].location = 2;
+//        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+//        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+//
+//        return attributeDescriptions; // std::move() ?
+//    }
+//};
 
 class Chunk
 {
 public:
-    Chunk(const glm::vec3& position, int width, int height, int depth, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+    static const int m_Width = 16;
+    static const int m_Height = 8;
+    static const int m_Depth = 16;
+public:
+    Chunk(const glm::ivec3& position, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
         :
-        m_Position{ position },
-        m_Width(width), m_Height(height), m_Depth(depth)
+        m_Position{ position }
     {
         m_Blocks.resize(m_Width * m_Height * m_Depth, BlockType::Air);
         LoadBlockData("textures/blockdata.json");
         GenerateMesh();
+
         // Create Vulkan buffers
+        m_Device = device;
         CreateVertexBuffer(device, physicalDevice, commandPool);
         CreateIndexBuffer(device, physicalDevice, commandPool);
     }
+
+    //~Chunk()
+    //{
+    //    vkDestroyBuffer(m_Device, m_VkVertexBuffer, nullptr);
+    //    vkFreeMemory(m_Device, m_VkVertexBufferMemory, nullptr);
+    //    vkDestroyBuffer(m_Device, m_VkIndexBuffer, nullptr);
+    //    vkFreeMemory(m_Device, m_VkIndexBufferMemory, nullptr);
+    //}
 
     void Destroy(VkDevice device)
     {
@@ -105,8 +154,14 @@ public:
             for (int y = 0; y < m_Height; ++y) {
                 for (int z = 0; z < m_Depth; ++z) {
                     // Fill the chunk with grass on top
+                    //if (y >= m_Height - 5) {
+                    //    if(z >= m_Depth / 2)
+                    //    SetBlock({x,y,z}, BlockType::Leaves);
+                    //    else
+                    //        SetBlock({x,y,z}, BlockType::Water);
+                    //}
                     if (y >= m_Height - 5) {
-                        SetBlock({x,y,z}, BlockType::Water);
+                        SetBlock({ x,y,z }, BlockType::GrassBlock);
                     }
                     // Fill the chunk with dirt below the grass
                     else if (y >= m_Height - 10) {
@@ -119,7 +174,8 @@ public:
                 }
             }
         }
-
+         
+        //SetBlock({ 0,0,0 }, BlockType::GrassBlock);
         // Create the optimized mesh
         for (int x = 0; x < m_Width; ++x)
         {
@@ -183,7 +239,7 @@ public:
             pipelineLayout,
             VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
             0, // Offset within the push constants to update
-            sizeof(glm::vec3), // size of the push constants to update
+            sizeof(glm::ivec3), // size of the push constants to update
             &m_Position
         );
 
@@ -193,11 +249,13 @@ public:
         vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
     }
 
+    const glm::ivec3& GetPosition() const { return m_Position; }
+
+    void SetIsMarkedForDeletion(bool state) { m_IsMarkedForDeletion = state; }
+    bool IsMarkedForDeletion() const { return m_IsMarkedForDeletion; }
 private:
-    glm::vec3 m_Position{};
-    int m_Width;
-    int m_Height;
-    int m_Depth;
+    glm::ivec3 m_Position{};
+    bool m_IsMarkedForDeletion{};
     std::vector<BlockType> m_Blocks;
     std::vector<Vertex> m_Vertices;
     std::vector<uint32_t> m_Indices;
@@ -264,7 +322,6 @@ private:
         // If none of the neighboring blocks are translucent, consider the current block as opaque
         return true;
     }
-
 
     void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {
@@ -394,7 +451,6 @@ private:
         // We assume that the block types are defined in the same order as in the JSON file
         return static_cast<BlockType>(index);
     }
-
 
     void AddFaceVertices(BlockType blockType, Direction direction, const glm::vec3& position)
     {

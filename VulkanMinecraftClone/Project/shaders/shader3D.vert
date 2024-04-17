@@ -14,7 +14,7 @@ layout(binding = 0) uniform UniformBufferObject
 } ubo;
 
 layout(push_constant) uniform PushConstants {
-    vec3 translation;
+    ivec3 translation;
 } mesh;
 
 

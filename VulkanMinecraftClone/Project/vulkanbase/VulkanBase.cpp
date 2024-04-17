@@ -163,6 +163,7 @@ void VulkanBase::cleanup()
 	m_GraphicsPipeline3D->DestroyPipeline(m_Device);
 
 	m_pGame->Destroy(m_Device);
+	//m_pGame.reset(nullptr);
 
 	m_RenderPass->Destroy(m_Device);
 
