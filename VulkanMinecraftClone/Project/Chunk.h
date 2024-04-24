@@ -9,6 +9,8 @@
 #include <vendor/json.hpp>
 #include <iostream>
 #include "BlockMesh.h"
+#include "QueueManager.h"
+#include "Timer.h"
 
 // IMPORTANT:
 // ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
@@ -90,15 +92,16 @@ struct BlockData
 class Chunk
 {
 public:
-    static const int m_Width = 16;
+    static const int m_Width = 32;
     static const int m_Height = 8;
-    static const int m_Depth = 16;
+    static const int m_Depth = 32;
 public:
     Chunk(const glm::ivec3& position, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
         :
         m_Position{ position }
     {
         m_Blocks.resize(m_Width * m_Height * m_Depth, BlockType::Air);
+        // Move to chunkgenerator
         LoadBlockData("textures/blockdata.json");
         GenerateMesh();
 
@@ -108,22 +111,14 @@ public:
         CreateIndexBuffer(device, physicalDevice, commandPool);
     }
 
-    //~Chunk()
-    //{
-    //    vkDestroyBuffer(m_Device, m_VkVertexBuffer, nullptr);
-    //    vkFreeMemory(m_Device, m_VkVertexBufferMemory, nullptr);
-    //    vkDestroyBuffer(m_Device, m_VkIndexBuffer, nullptr);
-    //    vkFreeMemory(m_Device, m_VkIndexBufferMemory, nullptr);
-    //}
-
     void Destroy(VkDevice device)
     {
+        // Destroy Vulkan buffers
         vkDestroyBuffer(device, m_VkVertexBuffer, nullptr);
         vkFreeMemory(device, m_VkVertexBufferMemory, nullptr);
         vkDestroyBuffer(device, m_VkIndexBuffer, nullptr);
         vkFreeMemory(device, m_VkIndexBufferMemory, nullptr);
     }
-
     void SetBlock(const glm::vec3& position, BlockType blockType)
     {
         if (position.x >= 0 && position.x < m_Width && position.y >= 0 && position.y < m_Height && position.z >= 0 && position.z < m_Depth)
@@ -232,7 +227,7 @@ public:
         UpdateIndexBuffer();
     }
 
-    void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout) const
+    void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
     {
         // Bind vertex buffer
         VkBuffer vertexBuffers[] = { m_VkVertexBuffer };
@@ -255,16 +250,28 @@ public:
         // Draw triangles directly from the vertex buffer
         //vkCmdDraw(commandBuffer, static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
 
+        // Submit rendering commands
         vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
     }
 
+    void Update();
+
     const glm::ivec3& GetPosition() const { return m_Position; }
 
-    void SetIsMarkedForDeletion(bool state) { m_IsMarkedForDeletion = state; }
+    void SetIsMarkedForDeletion(bool state)
+    { 
+        m_IsMarkedForDeletion = state; 
+
+        if (state == false)
+        {
+            m_DeletionTimer = 0;
+        }
+    }
+
     bool IsMarkedForDeletion() const { return m_IsMarkedForDeletion; }
+    bool IsDeleted() const { return m_IsDeleted; }
 private:
     glm::ivec3 m_Position{};
-    bool m_IsMarkedForDeletion{};
     std::vector<BlockType> m_Blocks;
     std::vector<Vertex> m_Vertices;
     std::vector<uint32_t> m_Indices;
@@ -273,6 +280,10 @@ private:
     VkDeviceMemory m_VkVertexBufferMemory;
     VkBuffer m_VkIndexBuffer;
     VkDeviceMemory m_VkIndexBufferMemory;
+
+    bool m_IsMarkedForDeletion{};
+    bool m_IsDeleted{};
+    float m_DeletionTimer{};
 
     std::unordered_map<BlockType, BlockData> m_BlockData{};
 

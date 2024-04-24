@@ -34,10 +34,10 @@ public:
     {
         for (const auto& chunk : m_Chunks)
         {
-            //if (!chunk.IsMarkedForDeletion())
-            //{
+            if (!chunk->IsMarkedForDeletion())
+            {
                 chunk->Render(commandBuffer, pipelineLayout);
-            //}
+            }
         }
     }
 
@@ -53,6 +53,34 @@ public:
             // Update chunks around the player
             UpdateChunksAroundPlayer();
         }
+
+        for (auto& chunk : m_Chunks)
+        {
+
+            chunk->Update();
+            
+        }
+
+        // Destroy all chunks that are to be destroyed if any
+        DestroyDeletedChunks();
+    }
+
+    void DestroyDeletedChunks()
+    {
+        auto it = m_Chunks.begin();
+        while (it != m_Chunks.end())
+        {
+            if ((*it)->IsDeleted())
+            {
+                (*it)->Destroy(m_Device);
+                it = m_Chunks.erase(it); // Erase the current element and get the iterator to the next element
+                std::cout << "Destroyed a chunk!\n";
+            }
+            else
+            {
+                ++it; // Move to the next element
+            }
+        }
     }
 
     void Destroy()
@@ -63,8 +91,11 @@ public:
         }
     }
 
+    float GetChunkDeletionTime() const { return m_ChunkDeletionTime; }
 private:
     const int m_ViewDistance{ 4 }; // View distance in grid tiles
+    const float m_ChunkDeletionTime{ 3.f }; // Time to delete chunks after being marked for deletion
+
     std::vector<std::unique_ptr<Chunk>> m_Chunks;
     VkDevice m_Device;
     VkPhysicalDevice m_PhysicalDevice;
@@ -88,23 +119,21 @@ private:
         int maxX = m_PlayerChunkPosition.x + m_ViewDistance;
         int minZ = m_PlayerChunkPosition.z - m_ViewDistance;
         int maxZ = m_PlayerChunkPosition.z + m_ViewDistance;
-
-        // TODO: Be able to actually delete chunks
         
-        // Destroy chunks outside the view distance
-        //auto iter = std::remove_if(m_Chunks.begin(), m_Chunks.end(), [&](const std::unique_ptr<Chunk>& chunk)
-        //    {
-        //    glm::ivec3 chunkPosition = CalculateChunkPosition(chunk->GetPosition());
-        //    bool outsideViewDistance = chunkPosition.x < minX || chunkPosition.x > maxX ||
-        //        chunkPosition.z < minZ || chunkPosition.z > maxZ;
-        //    if (outsideViewDistance) 
-        //    {
-        //        //chunk->SetIsMarkedForDeletion(true);
-        //        chunk->Destroy(m_Device); // Release resources
-        //    }
-        //    return outsideViewDistance;
-        //    });
-        //m_Chunks.erase(iter, m_Chunks.end());
+        // Mark chunks for deletion outside the view distance
+        for (auto& chunk : m_Chunks)
+        {
+            glm::ivec3 chunkPosition = CalculateChunkPosition(chunk->GetPosition());
+            bool outsideViewDistance = chunkPosition.x < minX || chunkPosition.x > maxX || chunkPosition.z < minZ || chunkPosition.z > maxZ;
+            if (outsideViewDistance)
+            {
+                chunk->SetIsMarkedForDeletion(true);
+            }
+            else
+            {
+                chunk->SetIsMarkedForDeletion(false);
+            }
+        }
 
         // Create chunks inside the view distance if not already existing
         for (int x = minX; x <= maxX; ++x)
