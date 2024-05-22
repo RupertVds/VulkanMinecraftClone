@@ -10,15 +10,19 @@
 #include <mutex>
 #include "CommandPool.h"
 
+class SimplexNoise;
+
 class ChunkGenerator final
 {
 private:
-    const int m_ViewDistance{ 14 }; // View distance in grid tiles
-    const int m_LoadDistance{ 8 }; // Load distance in grid tiles
-    const int m_Padding{ 5 }; // Padding for chunk loading
+    const int m_ViewDistance{ 11 }; // View distance in grid tiles
+    const int m_LoadDistance{ 1 }; // Load distance in grid tiles
+    const int m_Padding{ 3 }; // Padding for chunk loading
     const float m_ChunkDeletionTime{ 10.f }; // Time to delete chunks after being marked for deletion
+    std::unique_ptr<SimplexNoise> m_pSimplexNoise;
 
-    siv::PerlinNoise::seed_type m_Seed{ 0 };
+
+    //siv::PerlinNoise::seed_type m_Seed{ 0 };
 public:
     static ChunkGenerator& GetInstance()
     {
@@ -32,6 +36,10 @@ public:
         this->m_Device = device;
         this->m_PhysicalDevice = physicalDevice;
         this->m_CommandPool = commandPool;
+
+        //m_pSimplexNoise = std::make_unique<SimplexNoise>();
+        m_pSimplexNoise = std::make_unique<SimplexNoise>(0.003f, 1.f, 2.f, 0.5f);
+
 
         // Initialize the player's chunk position
         m_PlayerChunkPosition = { 0, 0, 0 };
@@ -72,6 +80,18 @@ public:
         // Destroy all chunks that are to be destroyed if any
         DestroyDeletedChunks();
     }
+
+    int GetHeight(const glm::ivec3& globalPosition)
+    {
+        float noise = m_pSimplexNoise->fractal(4, globalPosition.x, globalPosition.z);
+        int terrainHeight = static_cast<int>(noise * (Chunk::m_Height * (Chunk::m_MaxHeight - Chunk::m_MinHeight)) + Chunk::m_Height * Chunk::m_MinHeight);
+
+        // Clamp terrainHeight to ensure it's within the range [0, m_Height]
+        terrainHeight = std::clamp(terrainHeight, 0, Chunk::m_Height);
+
+        return terrainHeight;
+    }
+
 
     void DestroyDeletedChunks()
     {
@@ -158,7 +178,8 @@ private:
                             chunkPosition.x * Chunk::m_Width,
                             chunkPosition.y * Chunk::m_Height,
                             chunkPosition.z * Chunk::m_Depth),
-                        m_Seed,
+                        //m_Seed,
+                        m_pSimplexNoise.get(),
                         m_Device,
                         m_PhysicalDevice,
                         m_CommandPool));
@@ -185,7 +206,8 @@ private:
                             neighborChunkPosition.x * Chunk::m_Width,
                             neighborChunkPosition.y * Chunk::m_Height,
                             neighborChunkPosition.z * Chunk::m_Depth),
-                        m_Seed,
+                        //m_Seed,
+                        m_pSimplexNoise.get(),
                         m_Device,
                         m_PhysicalDevice,
                         m_CommandPool));

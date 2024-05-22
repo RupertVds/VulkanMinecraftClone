@@ -12,7 +12,8 @@
 #include "QueueManager.h"
 #include "Timer.h"
 #include <mutex>
-#include "vendor/PerlinNoise.hpp"
+//#include "vendor/PerlinNoise.hpp"
+#include "vendor/SimplexNoise.h"
 
 // IMPORTANT:
 // ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
@@ -55,29 +56,14 @@ struct BlockData
 class Chunk
 {
 public:
-    static constexpr int m_Width = 32;
-    static constexpr int m_Height = 64;
-    static constexpr int m_Depth = 32;
-    static constexpr float m_SeaLevel = 0.3f; // Sea level as a fraction of m_Height
+    static constexpr int m_Width = 64;
+    static constexpr int m_Height = 128;
+    static constexpr int m_Depth = 64;
+    static constexpr float m_SeaLevel = 0.1f; // Sea level as a fraction of m_Height
     static constexpr float m_MinHeight = 0.0f;
     static constexpr float m_MaxHeight = 1.0f;
 public:
-    Chunk(const glm::ivec3& position, const siv::PerlinNoise::seed_type& seed, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
-        :
-        m_Position{ position },
-        m_Seed{ seed },
-        m_Perlin{ seed }
-    {
-        m_Blocks.resize(m_Width * m_Height * m_Depth, BlockType::Air);
-        // Move to chunkgenerator
-        LoadBlockData("textures/blockdata.json");
-        GenerateMesh();
-
-        m_Device = device;
-        // Create Vulkan buffers
-        CreateVertexBuffer(device, physicalDevice, commandPool);
-        CreateIndexBuffer(device, physicalDevice, commandPool);
-    }
+    Chunk(const glm::ivec3& position, SimplexNoise* noise, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
 
     void Destroy(VkDevice device)
     {
@@ -104,100 +90,9 @@ public:
         return BlockType::Air;
     }
 
-    void GenerateMesh()
-    {
-        // Generate mesh data for the chunk
-        m_VerticesLand.clear();
-        m_IndicesLand.clear();
+    void GenerateMesh();
 
-        for (int x = 0; x < m_Width; ++x)
-        {
-            for (int z = 0; z < m_Depth; ++z)
-            {
-                // Use Perlin noise to determine the height of the terrain
-                float noise = m_Perlin.octave2D_01(
-                    (m_Position.x * m_Width + x) * 0.01,
-                    (m_Position.z * m_Depth + z) * 0.01,
-                    8,
-                    0.05); // Scale factor and number of octaves
-                
-                int terrainHeight = static_cast<int>(noise * (m_Height * (m_MaxHeight - m_MinHeight)) + m_Height * m_MinHeight);
-
-                for (int y = 0; y < m_Height; ++y)
-                {
-                    if (y <= terrainHeight)
-                    {
-                        if (y < m_Height * m_SeaLevel)
-                        {
-                            SetBlock({ x, y, z }, BlockType::Water);
-                        }
-                        else if (y == terrainHeight)
-                        {
-                            SetBlock({ x, y, z }, BlockType::GrassBlock);
-                        }
-                        else if (y > terrainHeight - 3)
-                        {
-                            SetBlock({ x, y, z }, BlockType::Dirt);
-                        }
-                        else
-                        {
-                            SetBlock({ x, y, z }, BlockType::Stone);
-                        }
-                    }
-                    else
-                    {
-                        SetBlock({ x, y, z }, BlockType::Air);
-                    }
-                }
-            }
-        }
-
-        // Create the optimized mesh
-        for (int x = 0; x < m_Width; ++x)
-        {
-            for (int y = 0; y < m_Height; ++y)
-            {
-                for (int z = 0; z < m_Depth; ++z)
-                {
-                    BlockType blockType = GetBlock({ x, y, z });
-
-                    // Skip air blocks
-                    if (blockType == BlockType::Air)
-                    {
-                        continue;
-                    }
-
-                    // Add faces for opaque blocks
-                    for (const auto& [direction, offset] : m_FaceOffsets)
-                    {
-                        int nx = x + offset.x;
-                        int ny = y + offset.y;
-                        int nz = z + offset.z;
-
-                        if (blockType != BlockType::Leaves)
-                        {
-                            // Check if the neighboring block is the same type
-                            if (IsSameBlockType(blockType, nx, ny, nz))
-                            {
-                                // Skip adding faces if the neighboring block is the same type
-                                continue;
-                            }
-                        }
-
-                        if (!IsOpaqueBlock(nx, ny, nz))
-                        {
-                            AddFaceVertices(blockType, direction, glm::vec3(x, y, z));
-                        }
-                    }
-                }
-            }
-        }
-
-        // Update Vulkan buffers
-        UpdateVertexBuffer();
-        UpdateIndexBuffer();
-    }
-
+    void GenerateTerrain();
 
     void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
     {
@@ -254,8 +149,9 @@ private:
     VkDeviceMemory m_VkVertexBufferMemory;
     VkBuffer m_VkIndexBuffer;
     VkDeviceMemory m_VkIndexBufferMemory;
-    siv::PerlinNoise::seed_type m_Seed;
-    siv::PerlinNoise m_Perlin;
+    //siv::PerlinNoise::seed_type m_Seed;
+    //siv::PerlinNoise m_Perlin;
+    SimplexNoise* m_pNoise{};
 
     bool m_IsMarkedForDeletion{};
     bool m_IsDeleted{};
@@ -321,6 +217,8 @@ private:
 
     void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {
+
+
         VkDeviceSize bufferSize = sizeof(m_VerticesLand[0]) * m_VerticesLand.size();
 
         VkBuffer stagingBuffer;
