@@ -10,17 +10,6 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 	Camera::GetInstance().Init(&InputManager::GetInstance(), { 0, 0, 5 });
 	ChunkGenerator::GetInstance().Init(device, physicalDevice, commandPool);
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
-	
-
-	//for (int x{}; x < 4; ++x)
-	//{
-	//	for (int z{}; z < 4; ++z)
-	//	{
-	//		//m_Chunks.emplace_back(std::make_unique<Chunk>(glm::vec3{ x*16 + x,0,z*16 + z}, 16, 64, 16, device, physicalDevice, commandPool));
-	//		m_Chunks.emplace_back(std::make_unique<Chunk>(glm::ivec3{ x*16,0,z*16}, 16, 64, 16, device, physicalDevice, commandPool));
-
-	//	}
-	//}
 
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);

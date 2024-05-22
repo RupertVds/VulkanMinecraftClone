@@ -81,6 +81,6 @@ private:
 	VkDeviceMemory m_VkVertexBufferMemory;
 	VkBuffer m_VkIndexBuffer;
 	VkDeviceMemory m_VkIndexBufferMemory;
-	std::vector<Vertex> m_Vertices;
-	std::vector<uint16_t> m_Indices;
+	std::vector<Vertex> m_VerticesLand;
+	std::vector<uint16_t> m_IndicesLand;
 };

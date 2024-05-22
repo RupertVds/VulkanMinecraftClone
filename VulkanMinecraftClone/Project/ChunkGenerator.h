@@ -6,9 +6,19 @@
 
 #include <vector>
 #include <algorithm>
+#include <thread>
+#include <mutex>
+#include "CommandPool.h"
 
 class ChunkGenerator final
 {
+private:
+    const int m_ViewDistance{ 14 }; // View distance in grid tiles
+    const int m_LoadDistance{ 8 }; // Load distance in grid tiles
+    const int m_Padding{ 5 }; // Padding for chunk loading
+    const float m_ChunkDeletionTime{ 10.f }; // Time to delete chunks after being marked for deletion
+
+    siv::PerlinNoise::seed_type m_Seed{ 0 };
 public:
     static ChunkGenerator& GetInstance()
     {
@@ -56,9 +66,7 @@ public:
 
         for (auto& chunk : m_Chunks)
         {
-
             chunk->Update();
-            
         }
 
         // Destroy all chunks that are to be destroyed if any
@@ -93,13 +101,11 @@ public:
 
     float GetChunkDeletionTime() const { return m_ChunkDeletionTime; }
 private:
-    const int m_ViewDistance{ 4 }; // View distance in grid tiles
-    const float m_ChunkDeletionTime{ 3.f }; // Time to delete chunks after being marked for deletion
-
     std::vector<std::unique_ptr<Chunk>> m_Chunks;
     VkDevice m_Device;
     VkPhysicalDevice m_PhysicalDevice;
     VkCommandPool m_CommandPool;
+
     glm::ivec3 m_PlayerChunkPosition;
 
     glm::ivec3 CalculateChunkPosition(const glm::vec3& position) const
@@ -115,16 +121,19 @@ private:
     void UpdateChunksAroundPlayer()
     {
         // Calculate the range of chunks to be loaded around the player
-        int minX = m_PlayerChunkPosition.x - m_ViewDistance;
-        int maxX = m_PlayerChunkPosition.x + m_ViewDistance;
-        int minZ = m_PlayerChunkPosition.z - m_ViewDistance;
-        int maxZ = m_PlayerChunkPosition.z + m_ViewDistance;
-        
+        int minX = m_PlayerChunkPosition.x - m_LoadDistance;
+        int maxX = m_PlayerChunkPosition.x + m_LoadDistance;
+        int minZ = m_PlayerChunkPosition.z - m_LoadDistance;
+        int maxZ = m_PlayerChunkPosition.z + m_LoadDistance;
+
         // Mark chunks for deletion outside the view distance
         for (auto& chunk : m_Chunks)
         {
             glm::ivec3 chunkPosition = CalculateChunkPosition(chunk->GetPosition());
-            bool outsideViewDistance = chunkPosition.x < minX || chunkPosition.x > maxX || chunkPosition.z < minZ || chunkPosition.z > maxZ;
+            bool outsideViewDistance = chunkPosition.x < m_PlayerChunkPosition.x - m_ViewDistance ||
+                chunkPosition.x > m_PlayerChunkPosition.x + m_ViewDistance ||
+                chunkPosition.z < m_PlayerChunkPosition.z - m_ViewDistance ||
+                chunkPosition.z > m_PlayerChunkPosition.z + m_ViewDistance;
             if (outsideViewDistance)
             {
                 chunk->SetIsMarkedForDeletion(true);
@@ -135,7 +144,7 @@ private:
             }
         }
 
-        // Create chunks inside the view distance if not already existing
+        // Create chunks inside the load distance if not already existing
         for (int x = minX; x <= maxX; ++x)
         {
             for (int z = minZ; z <= maxZ; ++z)
@@ -144,15 +153,42 @@ private:
                 if (!IsChunkLoaded(chunkPosition))
                 {
                     // Create and load the chunk
-                    m_Chunks.emplace_back(std::move(std::make_unique<Chunk>(
+                    m_Chunks.emplace_back(std::make_unique<Chunk>(
                         glm::ivec3(
                             chunkPosition.x * Chunk::m_Width,
                             chunkPosition.y * Chunk::m_Height,
                             chunkPosition.z * Chunk::m_Depth),
+                        m_Seed,
                         m_Device,
                         m_PhysicalDevice,
-                        m_CommandPool)));
-                    m_Chunks.back()->GenerateMesh();
+                        m_CommandPool));
+
+                    // Load neighbor chunks based on padding
+                    LoadNeighborChunks(chunkPosition);
+                }
+            }
+        }
+    }
+
+    void LoadNeighborChunks(const glm::ivec3& chunkPosition)
+    {
+        for (int dx = -m_Padding; dx <= m_Padding; ++dx)
+        {
+            for (int dz = -m_Padding; dz <= m_Padding; ++dz)
+            {
+                if (dx == 0 && dz == 0) continue; // Skip the center chunk (already loaded)
+                glm::ivec3 neighborChunkPosition = { chunkPosition.x + dx, 0, chunkPosition.z + dz };
+                if (!IsChunkLoaded(neighborChunkPosition))
+                {
+                    m_Chunks.emplace_back(std::make_unique<Chunk>(
+                        glm::ivec3(
+                            neighborChunkPosition.x * Chunk::m_Width,
+                            neighborChunkPosition.y * Chunk::m_Height,
+                            neighborChunkPosition.z * Chunk::m_Depth),
+                        m_Seed,
+                        m_Device,
+                        m_PhysicalDevice,
+                        m_CommandPool));
                 }
             }
         }

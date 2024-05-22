@@ -11,6 +11,8 @@
 #include "BlockMesh.h"
 #include "QueueManager.h"
 #include "Timer.h"
+#include <mutex>
+#include "vendor/PerlinNoise.hpp"
 
 // IMPORTANT:
 // ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
@@ -50,63 +52,29 @@ struct BlockData
     std::unordered_map<Direction, TextureCoords> textures;
 };
 
-//struct Vertex
-//{
-//    glm::vec3 position;
-//    glm::vec3 normal;
-//    glm::vec2 texCoord;
-//
-//    static std::unique_ptr<VkVertexInputBindingDescription> getBindingDescription()
-//    {
-//        auto bindingDescription = std::make_unique<VkVertexInputBindingDescription>();
-//        bindingDescription->binding = 0;
-//        bindingDescription->stride = sizeof(Vertex);
-//        bindingDescription->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-//
-//        return bindingDescription; // std::move() ?
-//    }
-//
-//    static std::unique_ptr<VkVertexInputAttributeDescription[]> getAttributeDescriptions()
-//    {
-//        auto attributeDescriptions = std::make_unique<VkVertexInputAttributeDescription[]>(3);
-//
-//        attributeDescriptions[0].binding = 0;
-//        attributeDescriptions[0].location = 0;
-//        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-//        attributeDescriptions[0].offset = offsetof(Vertex, position);
-//
-//        attributeDescriptions[1].binding = 0;
-//        attributeDescriptions[1].location = 1;
-//        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-//        attributeDescriptions[1].offset = offsetof(Vertex, normal);
-//
-//        attributeDescriptions[2].binding = 0;
-//        attributeDescriptions[2].location = 2;
-//        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-//        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-//
-//        return attributeDescriptions; // std::move() ?
-//    }
-//};
-
 class Chunk
 {
 public:
-    static const int m_Width = 32;
-    static const int m_Height = 8;
-    static const int m_Depth = 32;
+    static constexpr int m_Width = 32;
+    static constexpr int m_Height = 64;
+    static constexpr int m_Depth = 32;
+    static constexpr float m_SeaLevel = 0.3f; // Sea level as a fraction of m_Height
+    static constexpr float m_MinHeight = 0.0f;
+    static constexpr float m_MaxHeight = 1.0f;
 public:
-    Chunk(const glm::ivec3& position, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+    Chunk(const glm::ivec3& position, const siv::PerlinNoise::seed_type& seed, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
         :
-        m_Position{ position }
+        m_Position{ position },
+        m_Seed{ seed },
+        m_Perlin{ seed }
     {
         m_Blocks.resize(m_Width * m_Height * m_Depth, BlockType::Air);
         // Move to chunkgenerator
         LoadBlockData("textures/blockdata.json");
         GenerateMesh();
 
-        // Create Vulkan buffers
         m_Device = device;
+        // Create Vulkan buffers
         CreateVertexBuffer(device, physicalDevice, commandPool);
         CreateIndexBuffer(device, physicalDevice, commandPool);
     }
@@ -139,47 +107,51 @@ public:
     void GenerateMesh()
     {
         // Generate mesh data for the chunk
-        // Implementation depends on your mesh generation algorithm
-        m_Vertices.clear();
-        m_Indices.clear();
+        m_VerticesLand.clear();
+        m_IndicesLand.clear();
 
+        for (int x = 0; x < m_Width; ++x)
+        {
+            for (int z = 0; z < m_Depth; ++z)
+            {
+                // Use Perlin noise to determine the height of the terrain
+                float noise = m_Perlin.octave2D_01(
+                    (m_Position.x * m_Width + x) * 0.01,
+                    (m_Position.z * m_Depth + z) * 0.01,
+                    8,
+                    0.05); // Scale factor and number of octaves
+                
+                int terrainHeight = static_cast<int>(noise * (m_Height * (m_MaxHeight - m_MinHeight)) + m_Height * m_MinHeight);
 
-        // Fill the chunk with grass blocks
-        for (int x = 0; x < m_Width; ++x) {
-            for (int y = 0; y < m_Height; ++y) {
-                for (int z = 0; z < m_Depth; ++z) {
-                    // Fill the chunk on top
-                    if (y >= m_Height - 2) 
+                for (int y = 0; y < m_Height; ++y)
+                {
+                    if (y <= terrainHeight)
                     {
-                        if(z >= m_Depth / 8)
-                            SetBlock({x,y,z}, BlockType::GrassBlock);
-                        if (z >= 2*m_Depth / 8)
-                            SetBlock({ x,y,z }, BlockType::Log);
-                        if (z >= 3*m_Depth / 8)
-                            SetBlock({ x,y,z }, BlockType::GrassBlock);
-                        if (z >= 4*m_Depth / 8)
-                            SetBlock({ x,y,z }, BlockType::Stone);
-                        if (z >= 5*m_Depth / 8)
-                            SetBlock({ x,y,z }, BlockType::Sand);
-                        if (z >= 6*m_Depth / 8)
-                            SetBlock({ x,y,z }, BlockType::Dirt);
-                        if (z >= 7 * m_Depth / 8)
-                            //SetBlock({ x,y,z }, BlockType::Water);
-                            SetBlock({ x,y,z }, BlockType::Log);
+                        if (y < m_Height * m_SeaLevel)
+                        {
+                            SetBlock({ x, y, z }, BlockType::Water);
+                        }
+                        else if (y == terrainHeight)
+                        {
+                            SetBlock({ x, y, z }, BlockType::GrassBlock);
+                        }
+                        else if (y > terrainHeight - 3)
+                        {
+                            SetBlock({ x, y, z }, BlockType::Dirt);
+                        }
+                        else
+                        {
+                            SetBlock({ x, y, z }, BlockType::Stone);
+                        }
                     }
-                    // Fill the chunk with dirt below the grass
-                    else if (y >= m_Height - 3) {
-                        SetBlock({ x,y,z }, BlockType::Dirt);
-                    }
-                    // Fill the rest of the chunk with stone
-                    else {
-                        SetBlock({ x,y,z }, BlockType::Stone);
+                    else
+                    {
+                        SetBlock({ x, y, z }, BlockType::Air);
                     }
                 }
             }
         }
-         
-        //SetBlock({ 0,0,0 }, BlockType::GrassBlock);
+
         // Create the optimized mesh
         for (int x = 0; x < m_Width; ++x)
         {
@@ -216,7 +188,6 @@ public:
                         {
                             AddFaceVertices(blockType, direction, glm::vec3(x, y, z));
                         }
-                        // Add face vertices
                     }
                 }
             }
@@ -226,6 +197,7 @@ public:
         UpdateVertexBuffer();
         UpdateIndexBuffer();
     }
+
 
     void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
     {
@@ -251,7 +223,7 @@ public:
         //vkCmdDraw(commandBuffer, static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
 
         // Submit rendering commands
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesLand.size()), 1, 0, 0, 0);
     }
 
     void Update();
@@ -273,13 +245,17 @@ public:
 private:
     glm::ivec3 m_Position{};
     std::vector<BlockType> m_Blocks;
-    std::vector<Vertex> m_Vertices;
-    std::vector<uint32_t> m_Indices;
+    std::vector<Vertex> m_VerticesLand;
+    std::vector<uint32_t> m_IndicesLand;
+    std::vector<Vertex> m_VerticesWater;
+    std::vector<uint32_t> m_IndicesWater;
     VkDevice m_Device;
     VkBuffer m_VkVertexBuffer;
     VkDeviceMemory m_VkVertexBufferMemory;
     VkBuffer m_VkIndexBuffer;
     VkDeviceMemory m_VkIndexBufferMemory;
+    siv::PerlinNoise::seed_type m_Seed;
+    siv::PerlinNoise m_Perlin;
 
     bool m_IsMarkedForDeletion{};
     bool m_IsDeleted{};
@@ -345,7 +321,7 @@ private:
 
     void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {
-        VkDeviceSize bufferSize = sizeof(m_Vertices[0]) * m_Vertices.size();
+        VkDeviceSize bufferSize = sizeof(m_VerticesLand[0]) * m_VerticesLand.size();
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
@@ -359,7 +335,7 @@ private:
 
         void* data;
         vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, m_Vertices.data(), (size_t)bufferSize);
+        memcpy(data, m_VerticesLand.data(), (size_t)bufferSize);
         vkUnmapMemory(device, stagingBufferMemory);
 
         CreateBuffer(
@@ -386,7 +362,7 @@ private:
 
     void CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {
-        VkDeviceSize bufferSize = sizeof(m_Indices[0]) * m_Indices.size();
+        VkDeviceSize bufferSize = sizeof(m_IndicesLand[0]) * m_IndicesLand.size();
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
@@ -400,7 +376,7 @@ private:
 
         void* data;
         vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, m_Indices.data(), (size_t)bufferSize);
+        memcpy(data, m_IndicesLand.data(), (size_t)bufferSize);
         vkUnmapMemory(device, stagingBufferMemory);
 
         CreateBuffer(
@@ -601,18 +577,18 @@ private:
 
 
         // Add vertices to the m_Vertices vector
-        size_t vertexOffset = m_Vertices.size();
+        size_t vertexOffset = m_VerticesLand.size();
         for (const Vertex& vertex : faceVertices)
         {
-            m_Vertices.emplace_back(vertex);
+            m_VerticesLand.emplace_back(vertex);
         }
 
         // Add indices to the m_Indices vector
-        m_Indices.emplace_back(vertexOffset);
-        m_Indices.emplace_back(vertexOffset + 1);
-        m_Indices.emplace_back(vertexOffset + 2);
-        m_Indices.emplace_back(vertexOffset + 2);
-        m_Indices.emplace_back(vertexOffset + 3);
-        m_Indices.emplace_back(vertexOffset);
+        m_IndicesLand.emplace_back(vertexOffset);
+        m_IndicesLand.emplace_back(vertexOffset + 1);
+        m_IndicesLand.emplace_back(vertexOffset + 2);
+        m_IndicesLand.emplace_back(vertexOffset + 2);
+        m_IndicesLand.emplace_back(vertexOffset + 3);
+        m_IndicesLand.emplace_back(vertexOffset);
     }
 };

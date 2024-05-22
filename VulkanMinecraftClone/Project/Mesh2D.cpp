@@ -5,8 +5,8 @@
 
 Mesh2D::Mesh2D(const std::vector<Vertex2D>& vertices, const std::vector<uint16_t>& indices, VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool)
     :
-    m_Vertices{vertices},
-    m_Indices{indices},
+    m_VerticesLand{vertices},
+    m_IndicesLand{indices},
     m_VkVertexBuffer{VK_NULL_HANDLE},
     m_VkVertexBufferMemory{VK_NULL_HANDLE},
     m_VkIndexBuffer{VK_NULL_HANDLE},
@@ -23,7 +23,7 @@ void Mesh2D::Initialize(VkPhysicalDevice physicalDevice, VkDevice device, VkComm
 
 void Mesh2D::CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
 {
-    VkDeviceSize bufferSize = sizeof(m_Vertices[0]) * m_Vertices.size();
+    VkDeviceSize bufferSize = sizeof(m_VerticesLand[0]) * m_VerticesLand.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -37,7 +37,7 @@ void Mesh2D::CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, m_Vertices.data(), (size_t)bufferSize);
+    memcpy(data, m_VerticesLand.data(), (size_t)bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
     CreateBuffer(
@@ -56,7 +56,7 @@ void Mesh2D::CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice
 
 void Mesh2D::CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
 {
-    VkDeviceSize bufferSize = sizeof(m_Indices[0]) * m_Indices.size();
+    VkDeviceSize bufferSize = sizeof(m_IndicesLand[0]) * m_IndicesLand.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -70,7 +70,7 @@ void Mesh2D::CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice,
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, m_Indices.data(), (size_t)bufferSize);
+    memcpy(data, m_IndicesLand.data(), (size_t)bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
     CreateBuffer(
@@ -96,7 +96,7 @@ void Mesh2D::Draw(VkCommandBuffer buffer)
     VkBuffer indexBuffers[] = { m_VkIndexBuffer };
     vkCmdBindIndexBuffer(buffer, m_VkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-    vkCmdDrawIndexed(buffer, static_cast<uint32_t>(m_Indices.size()), 1, 0, 0, 0);
+    vkCmdDrawIndexed(buffer, static_cast<uint32_t>(m_IndicesLand.size()), 1, 0, 0, 0);
 }
 
 void Mesh2D::DestroyMesh(VkDevice device)
