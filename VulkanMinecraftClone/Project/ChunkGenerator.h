@@ -16,8 +16,8 @@ class ChunkGenerator final
 {
 private:
     const int m_ViewDistance{ 11 }; // View distance in grid tiles
-    const int m_LoadDistance{ 1 }; // Load distance in grid tiles
-    const int m_Padding{ 3 }; // Padding for chunk loading
+    const int m_LoadDistance{ 3 }; // Load distance in grid tiles
+    const int m_Padding{ 2 }; // Padding for chunk loading
     const float m_ChunkDeletionTime{ 10.f }; // Time to delete chunks after being marked for deletion
     std::unique_ptr<SimplexNoise> m_pSimplexNoise;
 
@@ -39,6 +39,7 @@ public:
 
         //m_pSimplexNoise = std::make_unique<SimplexNoise>();
         m_pSimplexNoise = std::make_unique<SimplexNoise>(0.003f, 1.f, 2.f, 0.5f);
+        //m_pSimplexNoise = std::make_unique<SimplexNoise>(0.005f, 10.f, 2.f, 15.f);
 
 
         // Initialize the player's chunk position

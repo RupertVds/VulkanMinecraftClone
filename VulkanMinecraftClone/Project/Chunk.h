@@ -56,9 +56,9 @@ struct BlockData
 class Chunk
 {
 public:
-    static constexpr int m_Width = 64;
+    static constexpr int m_Width = 32;
     static constexpr int m_Height = 128;
-    static constexpr int m_Depth = 64;
+    static constexpr int m_Depth = 32;
     static constexpr float m_SeaLevel = 0.1f; // Sea level as a fraction of m_Height
     static constexpr float m_MinHeight = 0.0f;
     static constexpr float m_MaxHeight = 1.0f;

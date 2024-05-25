@@ -88,7 +88,7 @@ void Chunk::GenerateTerrain()
             }
 
             // Make the base of the mountains sand inside the water
-            if (height <= m_Height * m_SeaLevel)
+            if (height <= m_Height * m_SeaLevel + 3)
             {
                 // Fill up to the height with sand
                 for (int y = 0; y <= height; ++y)
@@ -97,7 +97,7 @@ void Chunk::GenerateTerrain()
                 }
             }
 
-            if (height > m_Height * m_SeaLevel)
+            if (height > m_Height * m_SeaLevel + 3)
             {
                 
                 // Calculate the number of layers of dirt

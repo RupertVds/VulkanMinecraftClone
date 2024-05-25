@@ -7,7 +7,7 @@
 
 void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
 {
-	Camera::GetInstance().Init(&InputManager::GetInstance(), { 0, 0, 5 });
+	Camera::GetInstance().Init(&InputManager::GetInstance(), { 2000, 20, 5 });
 	ChunkGenerator::GetInstance().Init(device, physicalDevice, commandPool);
 	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
 
