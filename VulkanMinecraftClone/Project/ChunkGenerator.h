@@ -20,8 +20,23 @@ private:
     const int m_Padding{ 2 }; // Padding for chunk loading
     const float m_ChunkDeletionTime{ 10.f }; // Time to delete chunks after being marked for deletion
     std::unique_ptr<SimplexNoise> m_pSimplexNoise;
+    std::unordered_map<BlockType, BlockData> m_BlockData{};
 
+    struct Offset
+    {
+        int x;
+        int y;
+        int z;
+    };
 
+    std::unordered_map<Direction, Offset> m_FaceOffsets{
+    {Direction::Down, {0, -1, 0}},
+    {Direction::East, {1, 0, 0}},
+    {Direction::North, {0, 0, -1}},
+    {Direction::South, {0, 0, 1}},
+    {Direction::Up, {0, 1, 0}},
+    {Direction::West, {-1, 0, 0}}
+    };
     //siv::PerlinNoise::seed_type m_Seed{ 0 };
 public:
     static ChunkGenerator& GetInstance()
@@ -36,6 +51,7 @@ public:
         this->m_Device = device;
         this->m_PhysicalDevice = physicalDevice;
         this->m_CommandPool = commandPool;
+        LoadBlockData("textures/blockdata.json");
 
         //m_pSimplexNoise = std::make_unique<SimplexNoise>();
         m_pSimplexNoise = std::make_unique<SimplexNoise>(0.003f, 1.f, 2.f, 0.5f);
@@ -43,10 +59,67 @@ public:
 
 
         // Initialize the player's chunk position
-        m_PlayerChunkPosition = { 0, 0, 0 };
+        m_PlayerChunkPosition = CalculateChunkPosition(Camera::GetInstance().m_Position);
 
         // Initialize chunks around the player
         UpdateChunksAroundPlayer();
+    }
+
+    void LoadBlockData(const std::string& jsonFilePath)
+    {
+        // Open the JSON file
+        std::ifstream jsonFile(jsonFilePath);
+        if (!jsonFile.is_open()) {
+            // Handle error: unable to open JSON file
+            return;
+        }
+
+        // Parse JSON data
+        nlohmann::json jsonData;
+        jsonFile >> jsonData;
+
+        // Check if "blocks" array exists
+        if (!jsonData.contains("blocks")) {
+            // Handle error: "blocks" array not found
+            return;
+        }
+
+        // Get the array of blocks
+        auto blocks = jsonData["blocks"];
+
+        // Iterate over each block type
+        for (size_t i = 0; i < blocks.size(); ++i) {
+            // Extract block data
+            BlockData blockData;
+            blockData.id = blocks[i]["id"];
+            auto texturesJson = blocks[i]["textures"];
+            int index = 0; // Counter for direction index
+            for (auto it = texturesJson.begin(); it != texturesJson.end(); ++it) {
+                Direction direction = static_cast<Direction>(index);
+                blockData.textures[direction] = { it.value()["row"], it.value()["col"] };
+                ++index; // Increment index for next direction
+            }
+
+            // Add block data to the map
+            m_BlockData[GetBlockType(i)] = blockData;
+        }
+    }
+
+    BlockType GetBlockType(size_t index) const
+    {
+        // Return the block type based on the index
+        // We assume that the block types are defined in the same order as in the JSON file
+        return static_cast<BlockType>(index);
+    }
+
+    const std::unordered_map<BlockType, BlockData>& GetBlockData() const
+    {
+        return m_BlockData;
+    }
+
+    const std::unordered_map<Direction, Offset>& GetFaceOffsets() const
+    {
+        return m_FaceOffsets;
     }
 
     void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)

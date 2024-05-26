@@ -17,7 +17,7 @@
 
 // IMPORTANT:
 // ORDER OF APPEARANCE IN THE JSON FILE MUST MATCH!!!
-enum class BlockType : unsigned short
+enum class BlockType : unsigned char
 {
     GrassBlock,
     Stone,
@@ -31,7 +31,7 @@ enum class BlockType : unsigned short
 
 // MUST BE SORTED ALFABETICALLY
 // BECAUSE THE JSON READER RETURNS IT ALFABETICALLY
-enum class Direction : unsigned short
+enum class Direction : unsigned char
 {
     Down,
     East,
@@ -149,31 +149,11 @@ private:
     VkDeviceMemory m_VkVertexBufferMemory;
     VkBuffer m_VkIndexBuffer;
     VkDeviceMemory m_VkIndexBufferMemory;
-    //siv::PerlinNoise::seed_type m_Seed;
-    //siv::PerlinNoise m_Perlin;
     SimplexNoise* m_pNoise{};
 
     bool m_IsMarkedForDeletion{};
     bool m_IsDeleted{};
     float m_DeletionTimer{};
-
-    std::unordered_map<BlockType, BlockData> m_BlockData{};
-
-    struct Offset
-    {
-        int x;
-        int y;
-        int z;
-    };
-
-    std::unordered_map<Direction, Offset> m_FaceOffsets{
-    {Direction::Down, {0, -1, 0}},
-    {Direction::East, {1, 0, 0}},
-    {Direction::North, {0, 0, -1}},
-    {Direction::South, {0, 0, 1}},
-    {Direction::Up, {0, 1, 0}},
-    {Direction::West, {-1, 0, 0}}
-    };
 private:
     size_t GetIndex(int x, int y, int z) const
     {
@@ -299,194 +279,5 @@ private:
         // vkUnmapMemory(...);
     }
 
-    void LoadBlockData(const std::string& jsonFilePath)
-    {
-        // Open the JSON file
-        std::ifstream jsonFile(jsonFilePath);
-        if (!jsonFile.is_open()) {
-            // Handle error: unable to open JSON file
-            return;
-        }
-
-        // Parse JSON data
-        nlohmann::json jsonData;
-        jsonFile >> jsonData;
-
-        // Check if "blocks" array exists
-        if (!jsonData.contains("blocks")) {
-            // Handle error: "blocks" array not found
-            return;
-        }
-
-        // Get the array of blocks
-        auto blocks = jsonData["blocks"];
-
-        // Iterate over each block type
-        for (size_t i = 0; i < blocks.size(); ++i) {
-            // Extract block data
-            BlockData blockData;
-            blockData.id = blocks[i]["id"];
-            auto texturesJson = blocks[i]["textures"];
-            int index = 0; // Counter for direction index
-            for (auto it = texturesJson.begin(); it != texturesJson.end(); ++it) {
-                Direction direction = static_cast<Direction>(index);
-                blockData.textures[direction] = { it.value()["row"], it.value()["col"] };
-                ++index; // Increment index for next direction
-            }
-
-            // Add block data to the map
-            m_BlockData[GetBlockType(i)] = blockData;
-        }
-    }
-
-    BlockType GetBlockType(size_t index) const
-    {
-        // Return the block type based on the index
-        // We assume that the block types are defined in the same order as in the JSON file
-        return static_cast<BlockType>(index);
-    }
-
-    void AddFaceVertices(BlockType blockType, Direction direction, const glm::vec3& position)
-    {
-        // Check if block data exists for the given block type
-        auto it = m_BlockData.find(blockType);
-        if (it == m_BlockData.end()) {
-            // Handle error: Block data not found for the given block type
-            std::cout << "ERROR: BLOCK DATA NOT FOUND FOR THE GIVEN BLOCK TYPE!\n";
-            return;
-        }
-
-        const BlockData& blockData = it->second;
-
-        constexpr float textureAtlasWidth = 16;
-        constexpr float textureAtlasHeight = 16;
-
-        // Get texture coordinates for the current face
-        auto textureCoordsIt = blockData.textures.find(direction);
-        if (textureCoordsIt == blockData.textures.end()) {
-            std::cout << "ERROR: TEX COORDS NOT FOUND FOR THE CURRENT FACE DIRECTION!\n";
-            return;
-        }
-
-        auto textureCoords = textureCoordsIt->second;
-
-        float texCoordLeft = textureCoords.column * (1.0f / textureAtlasWidth);
-        float texCoordRight = (textureCoords.column + 1) * (1.0f / textureAtlasWidth);
-        float texCoordTop = textureCoords.row * (1.0f / textureAtlasHeight);
-        float texCoordBottom = (textureCoords.row + 1) * (1.0f / textureAtlasHeight);
-
-        // Calculate the base position of the face
-        glm::vec3 basePosition = position;
-
-        // Adjust base position according to face direction
-        switch (direction) {
-        case Direction::Up:
-            basePosition.y += 0.5f;
-            break;
-        case Direction::Down:
-            basePosition.y -= 0.5f;
-            break;
-        case Direction::North:
-            basePosition.z -= 0.5f;
-            break;
-        case Direction::East:
-            basePosition.x += 0.5f;
-            break;
-        case Direction::South:
-            basePosition.z += 0.5f;
-            break;
-        case Direction::West:
-            basePosition.x -= 0.5f;
-            break;
-        }
-
-        // Calculate normals
-        glm::vec3 normal;
-        switch (direction) {
-        case Direction::Up:
-            normal = { 0.0f, 1.0f, 0.0f };
-            break;
-        case Direction::Down:
-            normal = { 0.0f, -1.0f, 0.0f };
-            break;
-        case Direction::North:
-            normal = { 0.0f, 0.0f, -1.0f };
-            break;
-        case Direction::East:
-            normal = { 1.0f, 0.0f, 0.0f };
-            break;
-        case Direction::South:
-            normal = { 0.0f, 0.0f, 1.0f };
-            break;
-        case Direction::West:
-            normal = { -1.0f, 0.0f, 0.0f };
-            break;
-        }
-
-        // Add vertices for the face
-        // Define vertices for the face
-        std::vector<Vertex> faceVertices;
-        faceVertices.reserve(4); // We need 4 vertices for a quad
-
-        // Add vertices for the face based on the direction
-        switch (direction) {
-        case Direction::Up:
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
-            break;
-
-        case Direction::Down:
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-            break;
-
-        case Direction::North:
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
-            break;
-
-        case Direction::South:
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
-            break;
-
-        case Direction::East:
-            faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordTop } });
-            break;
-
-        case Direction::West:
-            faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
-            faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordTop } });
-            faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
-            break;
-        }
-
-
-        // Add vertices to the m_Vertices vector
-        size_t vertexOffset = m_VerticesLand.size();
-        for (const Vertex& vertex : faceVertices)
-        {
-            m_VerticesLand.emplace_back(vertex);
-        }
-
-        // Add indices to the m_Indices vector
-        m_IndicesLand.emplace_back(vertexOffset);
-        m_IndicesLand.emplace_back(vertexOffset + 1);
-        m_IndicesLand.emplace_back(vertexOffset + 2);
-        m_IndicesLand.emplace_back(vertexOffset + 2);
-        m_IndicesLand.emplace_back(vertexOffset + 3);
-        m_IndicesLand.emplace_back(vertexOffset);
-    }
+    void AddFaceVertices(BlockType blockType, Direction direction, const glm::vec3& position);
 };
