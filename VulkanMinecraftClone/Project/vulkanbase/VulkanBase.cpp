@@ -37,8 +37,11 @@ void VulkanBase::initVulkan()
 
 	//m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
 	//	"shaders/shader3D.frag.spv", m_pGame->GetTextures());	
-	m_GraphicsPipeline3D = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shader3D.vert.spv",
-		"shaders/shader3D.frag.spv");
+	m_LandGraphicsPipeline = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shaderLand.vert.spv",
+		"shaders/shaderLand.frag.spv");
+
+	m_WaterGraphicsPipeline = std::make_unique<GraphicsPipeline3D>(m_Device, m_PhysicalDevice, m_RenderPass->GetHandle(), "shaders/shaderWater.vert.spv",
+		"shaders/shaderWater.frag.spv");
 
 	createSyncObjects();
 }
@@ -83,12 +86,17 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 	// 3D
 	m_RenderPass->Begin(m_CommandBuffer, SwapchainManager::GetInstance().GetSwapchainFrameBuffers(), imageIndex);
 
-	m_GraphicsPipeline3D->UpdateUniformBuffer(m_Device, imageIndex);
-	m_GraphicsPipeline3D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
-	m_GraphicsPipeline3D->BindDescriptorSets(m_CommandBuffer.GetVkCommandBuffer(), imageIndex);
+	m_LandGraphicsPipeline->UpdateUniformBuffer(m_Device, imageIndex);
+	m_LandGraphicsPipeline->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
+	m_LandGraphicsPipeline->BindDescriptorSets(m_CommandBuffer.GetVkCommandBuffer(), imageIndex);
 
-	m_pGame->Render(m_CommandBuffer.GetVkCommandBuffer(), m_GraphicsPipeline3D->GetPipelineLayout());
+	m_pGame->RenderLand(m_CommandBuffer.GetVkCommandBuffer(), m_LandGraphicsPipeline->GetPipelineLayout());
 
+	m_WaterGraphicsPipeline->UpdateUniformBuffer(m_Device, imageIndex);
+	m_WaterGraphicsPipeline->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
+	m_WaterGraphicsPipeline->BindDescriptorSets(m_CommandBuffer.GetVkCommandBuffer(), imageIndex);
+
+	m_pGame->RenderWater(m_CommandBuffer.GetVkCommandBuffer(), m_WaterGraphicsPipeline->GetPipelineLayout());
 
 	// 2D
 	m_BasicGraphicsPipeline2D->BindPipeline(m_CommandBuffer.GetVkCommandBuffer());
@@ -160,7 +168,8 @@ void VulkanBase::cleanup()
 	BlockMeshGenerator::GetInstance().Destroy(m_Device);
 
 	m_BasicGraphicsPipeline2D->DestroyPipeline(m_Device);
-	m_GraphicsPipeline3D->DestroyPipeline(m_Device);
+	m_LandGraphicsPipeline->DestroyPipeline(m_Device);
+	m_WaterGraphicsPipeline->DestroyPipeline(m_Device);
 
 	m_pGame->Destroy(m_Device);
 	//m_pGame.reset(nullptr);

@@ -1,6 +1,7 @@
 #include "Chunk.h"
 #include <ChunkGenerator.h>
 #include <algorithm>
+#include "GraphicsPipeline3D.h"
 
 Chunk::Chunk(const glm::ivec3& position, SimplexNoise* noise, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     :
@@ -136,9 +137,67 @@ void Chunk::GenerateTerrain()
             }
 
             // Add a full layer of sand at the lowest position if height is zero
-            SetBlock(glm::ivec3(x, 0, z), BlockType::Sand);
+            //SetBlock(glm::ivec3(x, 0, z), BlockType::Sand);
         }
     }
+}
+
+void Chunk::RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+{
+    // Bind vertex buffer
+    VkBuffer vertexBuffers[] = { m_VertexBufferLand };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+    // Bind index buffer
+    vkCmdBindIndexBuffer(commandBuffer, m_IndexBufferLand, 0, VK_INDEX_TYPE_UINT32);
+
+    // Update push constants
+    PushConstants pushConstants{};
+
+    pushConstants.translation = m_Position;
+    pushConstants.time = Timer::GetInstance().GetElapsed();
+    vkCmdPushConstants(
+        commandBuffer,
+        pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(PushConstants),
+        &pushConstants
+    );
+
+    // Submit rendering commands
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesLand.size()), 1, 0, 0, 0);
+}
+
+void Chunk::RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+{
+    if (m_VerticesWater.empty()) return;
+
+    // Bind vertex buffer
+    VkBuffer vertexBuffers[] = { m_VertexBufferWater };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+    // Bind index buffer
+    vkCmdBindIndexBuffer(commandBuffer, m_IndexBufferWater, 0, VK_INDEX_TYPE_UINT32);
+
+    // Update push constants
+    PushConstants pushConstants{};
+
+    pushConstants.translation = m_Position;
+    pushConstants.time = test;
+    vkCmdPushConstants(
+        commandBuffer,
+        pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(PushConstants),
+        &pushConstants
+    );
+
+    // Draw indexed
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesWater.size()), 1, 0, 0, 0);
 }
 
 void Chunk::Update()
@@ -146,7 +205,7 @@ void Chunk::Update()
     if (m_IsMarkedForDeletion)
     {
         const float deltaTime = Timer::GetInstance().GetElapsed();
-
+        
         // Increment deletion timer
         m_DeletionTimer += deltaTime;
 
@@ -157,6 +216,8 @@ void Chunk::Update()
             m_IsDeleted = true;
         }
     }
+
+    test += Timer::GetInstance().GetElapsed();;
 }
 
 void Chunk::AddFaceVertices(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, BlockType blockType, Direction direction, const glm::vec3& position)

@@ -64,7 +64,8 @@ private:
 
 	std::unique_ptr<Game> m_pGame;
 	std::unique_ptr<BasicGraphicsPipeline2D> m_BasicGraphicsPipeline2D;
-	std::unique_ptr<GraphicsPipeline3D> m_GraphicsPipeline3D;
+	std::unique_ptr<GraphicsPipeline3D> m_LandGraphicsPipeline;
+	std::unique_ptr<GraphicsPipeline3D> m_WaterGraphicsPipeline;
 
 	void initVulkan();
 	void initWindow();

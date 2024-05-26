@@ -59,7 +59,7 @@ public:
     static constexpr int m_Width = 32;
     static constexpr int m_Height = 128;
     static constexpr int m_Depth = 32;
-    static constexpr float m_SeaLevel = 0.1f; // Sea level as a fraction of m_Height
+    static constexpr float m_SeaLevel = 0.3f; // Sea level as a fraction of m_Height
     static constexpr float m_MinHeight = 0.0f;
     static constexpr float m_MaxHeight = 1.0f;
 public:
@@ -101,58 +101,10 @@ public:
 
     void GenerateTerrain();
 
-    void RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
-    {
-        // Bind vertex buffer
-        VkBuffer vertexBuffers[] = { m_VertexBufferLand };
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    void RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 
-        // Bind index buffer
-        vkCmdBindIndexBuffer(commandBuffer, m_IndexBufferLand, 0, VK_INDEX_TYPE_UINT32);
 
-        // Draw indexed
-        vkCmdPushConstants(
-            commandBuffer,
-            pipelineLayout,
-            VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
-            0, // Offset within the push constants to update
-            sizeof(glm::ivec3), // size of the push constants to update
-            &m_Position
-        );
-
-        // Submit rendering commands
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesLand.size()), 1, 0, 0, 0);
-    }
-
-    void RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
-    {
-        if (m_VerticesWater.empty()) return;
-
-        // Bind vertex buffer
-        VkBuffer vertexBuffers[] = { m_VertexBufferWater };
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-        // Bind index buffer
-        vkCmdBindIndexBuffer(commandBuffer, m_IndexBufferWater, 0, VK_INDEX_TYPE_UINT32);
-
-        // Draw indexed
-        vkCmdPushConstants(
-            commandBuffer,
-            pipelineLayout,
-            VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
-            0, // Offset within the push constants to update
-            sizeof(glm::ivec3), // size of the push constants to update
-            &m_Position
-        );
-
-        // Draw triangles directly from the vertex buffer
-        //vkCmdDraw(commandBuffer, static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
-
-        // Submit rendering commands
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesWater.size()), 1, 0, 0, 0);
-    }
+    void RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 
     void Update();
 
@@ -195,6 +147,7 @@ private:
     bool m_IsMarkedForDeletion{};
     bool m_IsDeleted{};
     float m_DeletionTimer{};
+    float test{};
 private:
     size_t GetIndex(int x, int y, int z) const
     {

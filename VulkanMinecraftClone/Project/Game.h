@@ -18,7 +18,8 @@ public:
 public:
 	void Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
 	void Update();
-	void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
+	void RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
+	void RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 	void Render2D(VkCommandBuffer commandBuffer);
 	void Destroy(VkDevice device);
 

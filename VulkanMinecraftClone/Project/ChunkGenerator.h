@@ -15,10 +15,11 @@ class SimplexNoise;
 class ChunkGenerator final
 {
 private:
-    const int m_ViewDistance{ 11 }; // View distance in grid tiles
-    const int m_LoadDistance{ 3 }; // Load distance in grid tiles
-    const int m_Padding{ 2 }; // Padding for chunk loading
-    const float m_ChunkDeletionTime{ 10.f }; // Time to delete chunks after being marked for deletion
+    static const int m_ViewDistance;
+    static const int m_LoadDistance;
+    static const int m_Padding; 
+    static const int m_NoiseFractals; 
+    static const float m_ChunkDeletionTime; 
     std::unique_ptr<SimplexNoise> m_pSimplexNoise;
     std::unordered_map<BlockType, BlockData> m_BlockData{};
 
@@ -46,24 +47,7 @@ public:
     }
 
 public:
-    void Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
-    {
-        this->m_Device = device;
-        this->m_PhysicalDevice = physicalDevice;
-        this->m_CommandPool = commandPool;
-        LoadBlockData("textures/blockdata.json");
-
-        //m_pSimplexNoise = std::make_unique<SimplexNoise>();
-        m_pSimplexNoise = std::make_unique<SimplexNoise>(0.003f, 1.f, 2.f, 0.5f);
-        //m_pSimplexNoise = std::make_unique<SimplexNoise>(0.005f, 10.f, 2.f, 15.f);
-
-
-        // Initialize the player's chunk position
-        m_PlayerChunkPosition = CalculateChunkPosition(Camera::GetInstance().m_Position);
-
-        // Initialize chunks around the player
-        UpdateChunksAroundPlayer();
-    }
+    void Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
 
     void LoadBlockData(const std::string& jsonFilePath)
     {
@@ -163,7 +147,6 @@ public:
         }
     }
 
-
     void Update()
     {
         // Check if the player has moved to a new chunk
@@ -188,7 +171,7 @@ public:
 
     int GetHeight(const glm::ivec3& globalPosition)
     {
-        float noise = m_pSimplexNoise->fractal(4, globalPosition.x, globalPosition.z);
+        float noise = m_pSimplexNoise->fractal(m_NoiseFractals, globalPosition.x, globalPosition.z);
         int terrainHeight = static_cast<int>(noise * (Chunk::m_Height * (Chunk::m_MaxHeight - Chunk::m_MinHeight)) + Chunk::m_Height * Chunk::m_MinHeight);
 
         // Clamp terrainHeight to ensure it's within the range [0, m_Height]

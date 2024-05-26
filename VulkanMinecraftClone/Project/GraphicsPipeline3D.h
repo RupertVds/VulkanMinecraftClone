@@ -18,6 +18,12 @@ struct UniformBufferObject
 	glm::mat4 proj;
 };
 
+struct PushConstants
+{
+	glm::ivec3 translation;
+	float time;
+};
+
 class Camera;
 class Texture;
 
@@ -122,7 +128,7 @@ public:
 		VkPushConstantRange pushConstantRange = {};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from
 		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(glm::ivec3);
+		pushConstantRange.size = sizeof(PushConstants);
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 		pipelineLayoutInfo.flags = 0;

@@ -57,13 +57,16 @@ void Game::Update()
 	//m_pScene3D->Update();
 }
 
-void Game::Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+void Game::RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
 	//m_pScene3D->Render(commandBuffer, pipelineLayout);
 	//m_Chunk->Render(commandBuffer, pipelineLayout);
 	ChunkGenerator::GetInstance().RenderLand(commandBuffer, pipelineLayout);
-	ChunkGenerator::GetInstance().RenderWater(commandBuffer, pipelineLayout);
+}
 
+void Game::RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+{
+	ChunkGenerator::GetInstance().RenderWater(commandBuffer, pipelineLayout);
 }
 
 void Game::Render2D(VkCommandBuffer commandBuffer)
