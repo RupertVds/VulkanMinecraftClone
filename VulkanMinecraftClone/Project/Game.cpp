@@ -9,7 +9,7 @@ void Game::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool 
 {
 	Camera::GetInstance().Init(&InputManager::GetInstance(), { 2000, 20, 5 });
 	ChunkGenerator::GetInstance().Init(device, physicalDevice, commandPool);
-	m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
+	//m_pScene3D = std::make_unique<Scene>(device, physicalDevice, commandPool);
 
 #pragma region 2D
 	m_pScene2D = std::make_unique<Scene2D>(device, physicalDevice, commandPool);
@@ -54,14 +54,15 @@ void Game::Update()
 
 	// Do game update stuff
 	m_pScene2D->Update();
-	m_pScene3D->Update();
+	//m_pScene3D->Update();
 }
 
 void Game::Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
-	m_pScene3D->Render(commandBuffer, pipelineLayout);
+	//m_pScene3D->Render(commandBuffer, pipelineLayout);
 	//m_Chunk->Render(commandBuffer, pipelineLayout);
-	ChunkGenerator::GetInstance().Render(commandBuffer, pipelineLayout);
+	ChunkGenerator::GetInstance().RenderLand(commandBuffer, pipelineLayout);
+	ChunkGenerator::GetInstance().RenderWater(commandBuffer, pipelineLayout);
 
 }
 
@@ -73,7 +74,7 @@ void Game::Render2D(VkCommandBuffer commandBuffer)
 void Game::Destroy(VkDevice device)
 {
 	m_pScene2D->CleanUp();
-	m_pScene3D->CleanUp();
+	//m_pScene3D->CleanUp();
 	ChunkGenerator::GetInstance().Destroy();
 	//m_Chunk->Destroy(device);
 	//m_pTextureAtlas->Destroy(device);

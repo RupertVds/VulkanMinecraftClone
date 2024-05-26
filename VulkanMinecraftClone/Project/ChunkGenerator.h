@@ -122,13 +122,24 @@ public:
         return m_FaceOffsets;
     }
 
-    void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+    void RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
     {
         for (const auto& chunk : m_Chunks)
         {
             if (!chunk->IsMarkedForDeletion())
             {
-                chunk->Render(commandBuffer, pipelineLayout);
+                chunk->RenderLand(commandBuffer, pipelineLayout);
+            }
+        }
+    }
+
+    void RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+    {
+        for (const auto& chunk : m_Chunks)
+        {
+            if (!chunk->IsMarkedForDeletion())
+            {
+                chunk->RenderWater(commandBuffer, pipelineLayout);
             }
         }
     }

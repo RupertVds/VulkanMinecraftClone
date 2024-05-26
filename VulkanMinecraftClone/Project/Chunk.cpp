@@ -13,8 +13,16 @@ Chunk::Chunk(const glm::ivec3& position, SimplexNoise* noise, VkDevice device, V
 
     m_Device = device;
     // Create Vulkan buffers
-    CreateVertexBuffer(device, physicalDevice, commandPool);
-    CreateIndexBuffer(device, physicalDevice, commandPool);
+    //CreateVertexBuffer(device, physicalDevice, commandPool);
+    //CreateIndexBuffer(device, physicalDevice, commandPool);
+    CreateLandVertexBuffer(device, physicalDevice, commandPool);
+    CreateLandIndexBuffer(device, physicalDevice, commandPool);
+    if (!m_VerticesWater.empty())
+    {
+        CreateWaterVertexBuffer(device, physicalDevice, commandPool);
+        CreateWaterIndexBuffer(device, physicalDevice, commandPool);
+    }
+
 }
 
 void Chunk::GenerateMesh()
@@ -22,6 +30,8 @@ void Chunk::GenerateMesh()
     // Generate mesh data for the chunk
     m_VerticesLand.clear();
     m_IndicesLand.clear();
+    m_VerticesWater.clear();
+    m_IndicesWater.clear();
 
     GenerateTerrain();
 
@@ -59,7 +69,14 @@ void Chunk::GenerateMesh()
 
                     if (!IsOpaqueBlock(nx, ny, nz))
                     {
-                        AddFaceVertices(blockType, direction, glm::vec3(x, y, z));
+                        if (blockType == BlockType::Water)
+                        {
+                            AddFaceVertices(m_VerticesWater, m_IndicesWater, blockType, direction, glm::vec3(x, y, z));
+                        }
+                        else
+                        {
+                            AddFaceVertices(m_VerticesLand, m_IndicesLand, blockType, direction, glm::vec3(x, y, z));
+                        }
                     }
                 }
             }
@@ -142,7 +159,7 @@ void Chunk::Update()
     }
 }
 
-void Chunk::AddFaceVertices(BlockType blockType, Direction direction, const glm::vec3& position)
+void Chunk::AddFaceVertices(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, BlockType blockType, Direction direction, const glm::vec3& position)
 {
     // Check if block data exists for the given block type
     auto it = ChunkGenerator::GetInstance().GetBlockData().find(blockType);
@@ -227,61 +244,60 @@ void Chunk::AddFaceVertices(BlockType blockType, Direction direction, const glm:
     // Add vertices for the face based on the direction
     switch (direction) {
     case Direction::Up:
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
         break;
 
     case Direction::Down:
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
         break;
 
     case Direction::North:
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
         break;
 
     case Direction::South:
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordRight, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x + 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordRight, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y + 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x - 0.5f, basePosition.y - 0.5f, basePosition.z }, normal, { texCoordLeft, texCoordBottom } });
         break;
 
     case Direction::East:
-        faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordRight, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordLeft, texCoordTop } });
         break;
 
     case Direction::West:
-        faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
-        faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordTop } });
-        faceVertices.push_back({ { basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
         break;
     }
 
-
-    // Add vertices to the m_Vertices vector
-    size_t vertexOffset = m_VerticesLand.size();
+    // Add vertices to the provided vertices vector
+    size_t vertexOffset = vertices.size();
     for (const Vertex& vertex : faceVertices)
     {
-        m_VerticesLand.emplace_back(vertex);
+        vertices.emplace_back(vertex);
     }
 
-    // Add indices to the m_Indices vector
-    m_IndicesLand.emplace_back(vertexOffset);
-    m_IndicesLand.emplace_back(vertexOffset + 1);
-    m_IndicesLand.emplace_back(vertexOffset + 2);
-    m_IndicesLand.emplace_back(vertexOffset + 2);
-    m_IndicesLand.emplace_back(vertexOffset + 3);
-    m_IndicesLand.emplace_back(vertexOffset);
+    // Add indices to the provided indices vector
+    indices.emplace_back(vertexOffset);
+    indices.emplace_back(vertexOffset + 1);
+    indices.emplace_back(vertexOffset + 2);
+    indices.emplace_back(vertexOffset + 2);
+    indices.emplace_back(vertexOffset + 3);
+    indices.emplace_back(vertexOffset);
 }

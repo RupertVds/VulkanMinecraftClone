@@ -68,10 +68,17 @@ public:
     void Destroy(VkDevice device)
     {
         // Destroy Vulkan buffers
-        vkDestroyBuffer(device, m_VkVertexBuffer, nullptr);
-        vkFreeMemory(device, m_VkVertexBufferMemory, nullptr);
-        vkDestroyBuffer(device, m_VkIndexBuffer, nullptr);
-        vkFreeMemory(device, m_VkIndexBufferMemory, nullptr);
+        vkDestroyBuffer(device, m_VertexBufferLand, nullptr);
+        vkFreeMemory(device, m_VertexBufferMemoryLand, nullptr);
+        vkDestroyBuffer(device, m_IndexBufferLand, nullptr);
+        vkFreeMemory(device, m_IndexBufferMemoryLand, nullptr);
+        if (!m_VerticesWater.empty())
+        {
+            vkDestroyBuffer(device, m_VertexBufferWater, nullptr);
+            vkFreeMemory(device, m_VertexBufferMemoryWater, nullptr);
+            vkDestroyBuffer(device, m_IndexBufferWater, nullptr);
+            vkFreeMemory(device, m_IndexBufferMemoryWater, nullptr);
+        }
     }
     void SetBlock(const glm::vec3& position, BlockType blockType)
     {
@@ -94,15 +101,41 @@ public:
 
     void GenerateTerrain();
 
-    void Render(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+    void RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
     {
         // Bind vertex buffer
-        VkBuffer vertexBuffers[] = { m_VkVertexBuffer };
+        VkBuffer vertexBuffers[] = { m_VertexBufferLand };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
         // Bind index buffer
-        vkCmdBindIndexBuffer(commandBuffer, m_VkIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(commandBuffer, m_IndexBufferLand, 0, VK_INDEX_TYPE_UINT32);
+
+        // Draw indexed
+        vkCmdPushConstants(
+            commandBuffer,
+            pipelineLayout,
+            VK_SHADER_STAGE_VERTEX_BIT, // Shader stage should match the push constant range in the layout
+            0, // Offset within the push constants to update
+            sizeof(glm::ivec3), // size of the push constants to update
+            &m_Position
+        );
+
+        // Submit rendering commands
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesLand.size()), 1, 0, 0, 0);
+    }
+
+    void RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
+    {
+        if (m_VerticesWater.empty()) return;
+
+        // Bind vertex buffer
+        VkBuffer vertexBuffers[] = { m_VertexBufferWater };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        // Bind index buffer
+        vkCmdBindIndexBuffer(commandBuffer, m_IndexBufferWater, 0, VK_INDEX_TYPE_UINT32);
 
         // Draw indexed
         vkCmdPushConstants(
@@ -118,7 +151,7 @@ public:
         //vkCmdDraw(commandBuffer, static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
 
         // Submit rendering commands
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesLand.size()), 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_IndicesWater.size()), 1, 0, 0, 0);
     }
 
     void Update();
@@ -145,10 +178,18 @@ private:
     std::vector<Vertex> m_VerticesWater;
     std::vector<uint32_t> m_IndicesWater;
     VkDevice m_Device;
-    VkBuffer m_VkVertexBuffer;
-    VkDeviceMemory m_VkVertexBufferMemory;
-    VkBuffer m_VkIndexBuffer;
-    VkDeviceMemory m_VkIndexBufferMemory;
+
+    // Vulkan buffers for land
+    VkBuffer m_VertexBufferLand;
+    VkDeviceMemory m_VertexBufferMemoryLand;
+    VkBuffer m_IndexBufferLand;
+    VkDeviceMemory m_IndexBufferMemoryLand;
+
+    // Vulkan buffers for water
+    VkBuffer m_VertexBufferWater;
+    VkDeviceMemory m_VertexBufferMemoryWater;
+    VkBuffer m_IndexBufferWater;
+    VkDeviceMemory m_IndexBufferMemoryWater;
     SimplexNoise* m_pNoise{};
 
     bool m_IsMarkedForDeletion{};
@@ -195,10 +236,29 @@ private:
         return true;
     }
 
-    void CreateVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+    void UpdateVertexBuffer()
+    {
+        // Update vertex buffer data
+        // vkMapMemory(...);
+        // memcpy(...);
+        // vkUnmapMemory(...);
+    }
+
+    void CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {
 
+    }
 
+    void UpdateIndexBuffer()
+    {
+        // Update index buffer data
+        // vkMapMemory(...);
+        // memcpy(...);
+        // vkUnmapMemory(...);
+    }
+
+    void CreateLandVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+    {
         VkDeviceSize bufferSize = sizeof(m_VerticesLand[0]) * m_VerticesLand.size();
 
         VkBuffer stagingBuffer;
@@ -222,23 +282,14 @@ private:
             bufferSize,
             VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            m_VkVertexBuffer, m_VkVertexBufferMemory);
+            m_VertexBufferLand, m_VertexBufferMemoryLand);
 
-        CopyBuffer(device, commandPool, stagingBuffer, m_VkVertexBuffer, bufferSize);
+        CopyBuffer(device, commandPool, stagingBuffer, m_VertexBufferLand, bufferSize);
 
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingBufferMemory, nullptr);
     }
-
-    void UpdateVertexBuffer()
-    {
-        // Update vertex buffer data
-        // vkMapMemory(...);
-        // memcpy(...);
-        // vkUnmapMemory(...);
-    }
-
-    void CreateIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+    void CreateLandIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {
         VkDeviceSize bufferSize = sizeof(m_IndicesLand[0]) * m_IndicesLand.size();
 
@@ -263,21 +314,79 @@ private:
             bufferSize,
             VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            m_VkIndexBuffer, m_VkIndexBufferMemory);
+            m_IndexBufferLand, m_IndexBufferMemoryLand);
 
-        CopyBuffer(device, commandPool, stagingBuffer, m_VkIndexBuffer, bufferSize);
+        CopyBuffer(device, commandPool, stagingBuffer, m_IndexBufferLand, bufferSize);
 
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingBufferMemory, nullptr);
     }
 
-    void UpdateIndexBuffer()
+    void CreateWaterVertexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     {
-        // Update index buffer data
-        // vkMapMemory(...);
-        // memcpy(...);
-        // vkUnmapMemory(...);
+        VkDeviceSize bufferSize = sizeof(m_VerticesWater[0]) * m_VerticesWater.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        CreateBuffer(
+            device,
+            physicalDevice,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBuffer, stagingBufferMemory);
+
+        void* data;
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, m_VerticesWater.data(), (size_t)bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        CreateBuffer(
+            device,
+            physicalDevice,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            m_VertexBufferWater, m_VertexBufferMemoryWater);
+
+        CopyBuffer(device, commandPool, stagingBuffer, m_VertexBufferWater, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
     }
 
-    void AddFaceVertices(BlockType blockType, Direction direction, const glm::vec3& position);
+    void CreateWaterIndexBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
+    {
+        VkDeviceSize bufferSize = sizeof(m_IndicesWater[0]) * m_IndicesWater.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        CreateBuffer(
+            device,
+            physicalDevice,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBuffer, stagingBufferMemory);
+
+        void* data;
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, m_IndicesWater.data(), (size_t)bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        CreateBuffer(
+            device,
+            physicalDevice,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            m_IndexBufferWater, m_IndexBufferMemoryWater);
+
+        CopyBuffer(device, commandPool, stagingBuffer, m_IndexBufferWater, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
+    void AddFaceVertices(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, BlockType blockType, Direction direction, const glm::vec3& position);
+    //void AddFaceVertices(BlockType blockType, Direction direction, const glm::vec3& position);
 };
