@@ -135,14 +135,34 @@ public:
 
     void RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
     {
+        // Retrieve the camera position
+        glm::vec3 cameraPosition = Camera::GetInstance().m_Position;
+
+        // Vector to store chunks with their distances
+        std::vector<std::pair<float, Chunk*>> chunkDistances;
+
+        // Calculate the distance from the camera to the center of each chunk
         for (const auto& chunk : m_Chunks)
         {
             if (!chunk->IsMarkedForDeletion())
             {
-                chunk->RenderWater(commandBuffer, pipelineLayout);
+                glm::vec3 chunkPosition = glm::vec3(chunk->GetPosition());
+                glm::vec3 chunkCenter = chunkPosition + glm::vec3(Chunk::m_Width / 2.0f, Chunk::m_Height / 2.0f, Chunk::m_Depth / 2.0f);
+                float distance = glm::distance(cameraPosition, chunkCenter);
+                chunkDistances.emplace_back(distance, chunk.get());
             }
         }
+
+        // Sort chunks by distance from the camera in ascending order
+        std::sort(chunkDistances.begin(), chunkDistances.end());
+
+        // Render the water in the sorted order
+        for (const auto& [distance, chunk] : chunkDistances)
+        {
+            chunk->RenderWater(commandBuffer, pipelineLayout);
+        }
     }
+
 
     void Update()
     {
