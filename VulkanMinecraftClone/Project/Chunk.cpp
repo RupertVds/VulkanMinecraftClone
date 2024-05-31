@@ -23,7 +23,6 @@ Chunk::Chunk(const glm::ivec3& position, SimplexNoise* noise, VkDevice device, V
         CreateWaterVertexBuffer(device, physicalDevice, commandPool);
         CreateWaterIndexBuffer(device, physicalDevice, commandPool);
     }
-
 }
 
 void Chunk::GenerateMesh()
@@ -340,19 +339,17 @@ void Chunk::AddFaceVertices(std::vector<Vertex>& vertices, std::vector<uint32_t>
         break;
 
     case Direction::West:
-        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordBottom } });
-        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
-        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordTop } });
-        faceVertices.emplace_back(Vertex{ { basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ glm::vec3{ basePosition.x, basePosition.y - 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ glm::vec3{ basePosition.x, basePosition.y - 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordBottom } });
+        faceVertices.emplace_back(Vertex{ glm::vec3{ basePosition.x, basePosition.y + 0.5f, basePosition.z + 0.5f }, normal, { texCoordRight, texCoordTop } });
+        faceVertices.emplace_back(Vertex{ glm::vec3{ basePosition.x, basePosition.y + 0.5f, basePosition.z - 0.5f }, normal, { texCoordLeft, texCoordTop } });
         break;
     }
 
     // Add vertices to the provided vertices vector
+    // Add vertices to the provided vertices vector
     size_t vertexOffset = vertices.size();
-    for (const Vertex& vertex : faceVertices)
-    {
-        vertices.emplace_back(vertex);
-    }
+    vertices.insert(vertices.end(), faceVertices.begin(), faceVertices.end());
 
     // Add indices to the provided indices vector
     indices.emplace_back(vertexOffset);

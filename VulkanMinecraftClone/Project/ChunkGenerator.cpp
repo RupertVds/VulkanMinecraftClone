@@ -14,10 +14,10 @@ void ChunkGenerator::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCo
     LoadBlockData("textures/blockdata.json");
 
     // frequency, amplitude, lacunarity, persistence
-    const float frequency = 0.005f;
+    const float frequency = 0.001f;
     const float amplitude = 1.f;
     const float lacunarity = 2.f;
-    const float persistence = 0.25f;
+    const float persistence = 1/lacunarity;
 
     m_pSimplexNoise = std::make_unique<SimplexNoise>(frequency, amplitude, lacunarity, persistence);
     //m_pSimplexNoise = std::make_unique<SimplexNoise>(0.005f, 10.f, 2.f, 15.f);
@@ -33,4 +33,7 @@ void ChunkGenerator::Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCo
 
 // fractals, frequency, amplitude, lacunarity, persistence
 // 8, 0.005f, 1.f, 2.f, 0.25f
-// 
+//const float frequency = 0.005f;
+//const float amplitude = 1.f;
+//const float lacunarity = 2.f;
+//const float persistence = 1 / lacunarity;
