@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include <GLFW\glfw3.h>
 #include <iostream>
+#include <Timer.h>
 
 void Camera::Init(InputManager* inputManager, glm::vec3 position, glm::vec3 up, float yaw, float pitch)
 {
@@ -47,7 +48,7 @@ void Camera::Update(float deltaTime)
     }
     if (m_InputManager->IsKeyHeld(GLFW_KEY_F))
     {
-        m_MovementSpeed += 1.f;
+        m_MovementSpeed += 20.f * Timer::GetInstance().GetElapsed();
         if (m_MovementSpeed > MAX_MOVE_SPEED)
             m_MovementSpeed = MAX_MOVE_SPEED;
         if (m_MovementSpeed < MIN_MOVE_SPEED)
@@ -55,7 +56,7 @@ void Camera::Update(float deltaTime)
     }
     if (m_InputManager->IsKeyHeld(GLFW_KEY_G))
     {
-        m_MovementSpeed -= 1.f;
+        m_MovementSpeed -= 20.f * Timer::GetInstance().GetElapsed();
         if (m_MovementSpeed > MAX_MOVE_SPEED)
             m_MovementSpeed = MAX_MOVE_SPEED;
         if (m_MovementSpeed < MIN_MOVE_SPEED)

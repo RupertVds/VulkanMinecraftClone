@@ -46,8 +46,6 @@ struct Tree
 };
 
 
-
-
 Chunk::Chunk(const glm::ivec3& position, SimplexNoise* noise, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     :
     m_Position{ position },
