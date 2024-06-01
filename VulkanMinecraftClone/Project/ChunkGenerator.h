@@ -36,6 +36,7 @@ private:
     static const float m_ChunkDeletionTime; 
     std::unique_ptr<SimplexNoise> m_pSimplexNoise;
     std::unordered_map<BlockType, BlockData> m_BlockData{};
+    float m_WaterTimer{};
 
     struct Offset
     {
@@ -59,7 +60,6 @@ public:
         static ChunkGenerator instance;
         return instance;
     }
-
 public:
     void Init(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool);
 
@@ -120,6 +120,8 @@ public:
         return m_FaceOffsets;
     }
 
+    float GetWaterTimer() const { return m_WaterTimer; }
+
     void RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
     {
         for (const auto& chunk : m_ChunkMap)
@@ -174,6 +176,8 @@ public:
             UpdateChunksAroundPlayer();
         }
 
+        m_WaterTimer += Timer::GetInstance().GetElapsed();;
+
         for (auto& chunk : m_ChunkMap)
         {
             chunk.second->Update();
@@ -221,6 +225,17 @@ public:
     }
 
     float GetChunkDeletionTime() const { return m_ChunkDeletionTime; }
+
+    Chunk* GetChunkAtPosition(const glm::ivec3& position)
+    {
+        auto it = m_ChunkMap.find(position);
+        if (it != m_ChunkMap.end())
+        {
+            return it->second.get();
+        }
+        return nullptr; // or handle the case where the chunk is not found
+    }
+
 private:
     //std::vector<std::unique_ptr<Chunk>> m_Chunks;
     std::unordered_map<glm::ivec3, std::unique_ptr<Chunk>> m_ChunkMap;

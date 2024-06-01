@@ -1,8 +1,8 @@
 #include "ChunkGenerator.h"
 
 const int ChunkGenerator::m_ViewDistance{ 10 };  // View distance in grid tiles
-const int ChunkGenerator::m_LoadDistance{ 4 }; // Load distance in grid tiles
-const int ChunkGenerator::m_Padding{ 3 }; // Padding for chunk loading
+const int ChunkGenerator::m_LoadDistance{ 2 }; // Load distance in grid tiles
+const int ChunkGenerator::m_Padding{ 2 }; // Padding for chunk loading
 const int ChunkGenerator::m_NoiseFractals{ 8 }; // Amount of fractals for the noise
 const float ChunkGenerator::m_ChunkDeletionTime{ 10.f }; // Time to delete chunks after being marked for deletion
 

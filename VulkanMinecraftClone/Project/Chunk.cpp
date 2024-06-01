@@ -6,12 +6,15 @@
 
 const int TREE_HEIGHT = 5;
 const int TREE_TRUNK_HEIGHT = 4;
-const int TREE_LEAF_WIDTH = 3;
+const int TREE_LEAF_WIDTH = 5;
+const int TREE_LEAF_HEIGHT = 4;
+const int TREE_LEAF_MIDDLE_HEIGHT = 2;
+const int TREE_LEAF_MIDDLE_WIDTH = 3;
 
 struct Tree
 {
     glm::ivec3 trunk[TREE_TRUNK_HEIGHT];
-    glm::ivec3 leaves[TREE_LEAF_WIDTH][TREE_LEAF_WIDTH][TREE_LEAF_WIDTH];
+    glm::ivec3 leaves[TREE_LEAF_WIDTH][TREE_LEAF_HEIGHT][TREE_LEAF_WIDTH];
 
     Tree(const glm::ivec3& basePosition)
     {
@@ -23,13 +26,19 @@ struct Tree
 
         // Initialize leaves
         int halfWidth = TREE_LEAF_WIDTH / 2;
+        int halfMiddleWidth = TREE_LEAF_MIDDLE_WIDTH / 2;
         for (int x = -halfWidth; x <= halfWidth; ++x)
         {
-            for (int y = 0; y < TREE_LEAF_WIDTH; ++y)
+            for (int y = 0; y < TREE_LEAF_HEIGHT; ++y)
             {
                 for (int z = -halfWidth; z <= halfWidth; ++z)
                 {
-                    leaves[x + halfWidth][y][z + halfWidth] = basePosition + glm::ivec3(x, TREE_TRUNK_HEIGHT + y - 1, z);
+                    if (y < TREE_LEAF_MIDDLE_HEIGHT) {
+                        leaves[x + halfWidth][y][z + halfWidth] = basePosition + glm::ivec3(x, TREE_TRUNK_HEIGHT + y - 1, z);
+                    }
+                    else {
+                        leaves[x + halfWidth][y][z + halfWidth] = basePosition + glm::ivec3(x, TREE_TRUNK_HEIGHT + TREE_LEAF_MIDDLE_HEIGHT - 1, z);
+                    }
                 }
             }
         }
@@ -176,7 +185,7 @@ void Chunk::GenerateTerrain()
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0, 1.0);
-    const float treeSpawnChance = 0.05f; // 10% chance to spawn a tree on each grass block
+    const float treeSpawnChance = 0.05f; // 5% chance to spawn a tree on each grass block
 
     for (int x = 0; x < m_Width; ++x)
     {
@@ -203,7 +212,7 @@ void Chunk::GenerateTerrain()
                 {
                     for (int dx = 0; dx < TREE_LEAF_WIDTH; ++dx)
                     {
-                        for (int dy = 0; dy < TREE_LEAF_WIDTH; ++dy)
+                        for (int dy = 0; dy < TREE_LEAF_HEIGHT; ++dy)
                         {
                             for (int dz = 0; dz < TREE_LEAF_WIDTH; ++dz)
                             {
@@ -227,13 +236,22 @@ void Chunk::GenerateTerrain()
                     {
                         SetBlock(trunkPos, BlockType::Log);
                     }
+                    // Set leaves according to specified dimensions
                     for (int dx = 0; dx < TREE_LEAF_WIDTH; ++dx)
                     {
-                        for (int dy = 0; dy < TREE_LEAF_WIDTH; ++dy)
+                        for (int dy = 0; dy < TREE_LEAF_HEIGHT; ++dy)
                         {
                             for (int dz = 0; dz < TREE_LEAF_WIDTH; ++dz)
                             {
-                                SetBlock(potentialTree.leaves[dx][dy][dz], BlockType::Leaves);
+                                // Check if leaf position is within the specified shape
+                                if (dy < TREE_LEAF_MIDDLE_HEIGHT ||
+                                    (dx >= (TREE_LEAF_WIDTH - TREE_LEAF_MIDDLE_WIDTH) / 2 &&
+                                        dx < (TREE_LEAF_WIDTH + TREE_LEAF_MIDDLE_WIDTH) / 2 &&
+                                        dz >= (TREE_LEAF_WIDTH - TREE_LEAF_MIDDLE_WIDTH) / 2 &&
+                                        dz < (TREE_LEAF_WIDTH + TREE_LEAF_MIDDLE_WIDTH) / 2))
+                                {
+                                    SetBlock(potentialTree.leaves[dx][dy][dz], BlockType::Leaves);
+                                }
                             }
                         }
                     }
@@ -294,7 +312,7 @@ void Chunk::RenderWater(VkCommandBuffer commandBuffer, VkPipelineLayout pipeline
     PushConstants pushConstants{};
 
     pushConstants.translation = m_Position;
-    pushConstants.time = test;
+    pushConstants.time = ChunkGenerator::GetInstance().GetWaterTimer();
     vkCmdPushConstants(
         commandBuffer,
         pipelineLayout,
@@ -325,7 +343,7 @@ void Chunk::Update()
         }
     }
 
-    test += Timer::GetInstance().GetElapsed();;
+    //test += Timer::GetInstance().GetElapsed();;
 }
 
 void Chunk::AddFaceVertices(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, BlockType blockType, Direction direction, const glm::vec3& position)
