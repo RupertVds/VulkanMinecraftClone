@@ -2,6 +2,42 @@
 #include <ChunkGenerator.h>
 #include <algorithm>
 #include "GraphicsPipeline3D.h"
+#include <random>
+
+const int TREE_HEIGHT = 5;
+const int TREE_TRUNK_HEIGHT = 4;
+const int TREE_LEAF_WIDTH = 3;
+
+struct Tree
+{
+    glm::ivec3 trunk[TREE_TRUNK_HEIGHT];
+    glm::ivec3 leaves[TREE_LEAF_WIDTH][TREE_LEAF_WIDTH][TREE_LEAF_WIDTH];
+
+    Tree(const glm::ivec3& basePosition)
+    {
+        // Initialize trunk
+        for (int i = 0; i < TREE_TRUNK_HEIGHT; ++i)
+        {
+            trunk[i] = basePosition + glm::ivec3(0, i, 0);
+        }
+
+        // Initialize leaves
+        int halfWidth = TREE_LEAF_WIDTH / 2;
+        for (int x = -halfWidth; x <= halfWidth; ++x)
+        {
+            for (int y = 0; y < TREE_LEAF_WIDTH; ++y)
+            {
+                for (int z = -halfWidth; z <= halfWidth; ++z)
+                {
+                    leaves[x + halfWidth][y][z + halfWidth] = basePosition + glm::ivec3(x, TREE_TRUNK_HEIGHT + y - 1, z);
+                }
+            }
+        }
+    }
+};
+
+
+
 
 Chunk::Chunk(const glm::ivec3& position, SimplexNoise* noise, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool)
     :
@@ -115,9 +151,8 @@ void Chunk::GenerateTerrain()
 
             if (height > m_Height * m_SeaLevel + 3)
             {
-                
                 // Calculate the number of layers of dirt
-                int dirtLayers = min(height - (m_Height * m_SeaLevel + 1), 3);
+                int dirtLayers = (((height - (m_Height * m_SeaLevel + 1)) < (3)) ? (height - (m_Height * m_SeaLevel + 1)) : (3));
 
                 // Grass layer
                 SetBlock(glm::ivec3(x, height, z), BlockType::GrassBlock);
@@ -134,11 +169,85 @@ void Chunk::GenerateTerrain()
                     SetBlock(glm::ivec3(x, y, z), BlockType::Stone);
                 }
             }
-
-            // Add a full layer of sand at the lowest position if height is zero
-            //SetBlock(glm::ivec3(x, 0, z), BlockType::Sand);
         }
     }
+
+    // Tree generation
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+    const float treeSpawnChance = 0.05f; // 10% chance to spawn a tree on each grass block
+
+    for (int x = 0; x < m_Width; ++x)
+    {
+        for (int z = 0; z < m_Depth; ++z)
+        {
+            glm::ivec3 globalPosition = m_Position + glm::ivec3(x, 0, z);
+            int height = ChunkGenerator::GetInstance().GetHeight(globalPosition);
+            glm::ivec3 grassBlockPosition = glm::ivec3(x, height, z);
+
+            if (GetBlock(grassBlockPosition) == BlockType::GrassBlock)
+            {
+                // Check if there's enough space for a tree
+                bool canPlaceTree = true;
+                Tree potentialTree(grassBlockPosition + glm::ivec3(0, 1, 0));
+                for (const auto& trunkPos : potentialTree.trunk)
+                {
+                    if (!IsWithinBounds(trunkPos) || GetBlock(trunkPos) != BlockType::Air)
+                    {
+                        canPlaceTree = false;
+                        break;
+                    }
+                }
+                if (canPlaceTree)
+                {
+                    for (int dx = 0; dx < TREE_LEAF_WIDTH; ++dx)
+                    {
+                        for (int dy = 0; dy < TREE_LEAF_WIDTH; ++dy)
+                        {
+                            for (int dz = 0; dz < TREE_LEAF_WIDTH; ++dz)
+                            {
+                                glm::ivec3 leafPos = potentialTree.leaves[dx][dy][dz];
+                                if (!IsWithinBounds(leafPos) || GetBlock(leafPos) != BlockType::Air)
+                                {
+                                    canPlaceTree = false;
+                                    break;
+                                }
+                            }
+                            if (!canPlaceTree) break;
+                        }
+                        if (!canPlaceTree) break;
+                    }
+                }
+
+                // Place the tree if conditions are met
+                if (canPlaceTree && dis(gen) < treeSpawnChance)
+                {
+                    for (const auto& trunkPos : potentialTree.trunk)
+                    {
+                        SetBlock(trunkPos, BlockType::Log);
+                    }
+                    for (int dx = 0; dx < TREE_LEAF_WIDTH; ++dx)
+                    {
+                        for (int dy = 0; dy < TREE_LEAF_WIDTH; ++dy)
+                        {
+                            for (int dz = 0; dz < TREE_LEAF_WIDTH; ++dz)
+                            {
+                                SetBlock(potentialTree.leaves[dx][dy][dz], BlockType::Leaves);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool Chunk::IsWithinBounds(const glm::ivec3& position) const
+{
+    return position.x >= 0 && position.x < m_Width &&
+        position.y >= 0 && position.y < m_Height &&
+        position.z >= 0 && position.z < m_Depth;
 }
 
 void Chunk::RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)

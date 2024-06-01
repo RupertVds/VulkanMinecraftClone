@@ -101,6 +101,8 @@ public:
 
     void GenerateTerrain();
 
+    bool IsWithinBounds(const glm::ivec3& position) const;
+
     void RenderLand(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 
 
